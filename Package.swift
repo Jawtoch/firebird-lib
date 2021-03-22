@@ -6,23 +6,23 @@ import PackageDescription
 let package = Package(
     name: "firebird-lib",
     products: [
-        // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
-            name: "firebird-lib",
-            targets: ["firebird-lib"]),
+            name: "Firebird",
+            targets: ["Firebird"]),
     ],
     dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
+		.package(url: "https://github.com/Jawtoch/firebird-headers.git", from: "0.2.0"),
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages this package depends on.
+		.binaryTarget(name: "FirebirdFramework", path: "Firebird.xcframework"),
         .target(
-            name: "firebird-lib",
-            dependencies: []),
-        .testTarget(
-            name: "firebird-libTests",
-            dependencies: ["firebird-lib"]),
+            name: "Firebird",
+            dependencies: [
+				.byName(name: "FirebirdFramework"),
+				.product(name: "FirebirdHeaders", package: "firebird-headers"),
+			]),
+		.testTarget(
+			name: "FirebirdTests",
+			dependencies: ["Firebird"]),
     ]
 )
