@@ -12,6 +12,7 @@ let package = Package(
     ],
     dependencies: [
 		.package(url: "https://github.com/Jawtoch/firebird-headers.git", from: "0.2.0"),
+		.package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     ],
     targets: [
 		.binaryTarget(name: "FirebirdFramework", path: "Firebird.xcframework"),
@@ -20,6 +21,7 @@ let package = Package(
             dependencies: [
 				.byName(name: "FirebirdFramework"),
 				.product(name: "FirebirdHeaders", package: "firebird-headers"),
+				.product(name: "Logging", package: "swift-log"),
 			]),
 		.testTarget(
 			name: "FirebirdTests",

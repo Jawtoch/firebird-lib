@@ -6,3 +6,4 @@
 //
 
 @_exported import FirebirdHeaders
+@_exported import Logging
