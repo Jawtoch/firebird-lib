@@ -10,9 +10,19 @@ import XCTest
 
 final class FirebirdTests: XCTestCase {
 	
-	func testStatus() {
-		let firebird = Firebird()
-		XCTAssertNotNil(firebird.status)
+	func testConnect() throws {
+		let configuration = FirebirdConnectionConfiguration(
+			hostname: "localhost",
+			port: 3051,
+			username: "SYSDBA",
+			password: "MASTERKEY",
+			database: "EMPLOYEE")
+		
+		let connection = try FirebirdConnection.connect(configuration)
+		try connection.close()
 	}
 	
+	func testQuery() {
+		
+	}
 }

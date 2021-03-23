@@ -14,6 +14,8 @@ public extension FirebirdDatabase {
 			let statement = FirebirdStatement(query, logger: self.logger)
 			try statement.allocate(on: connection)
 			
+			try self.prepare(statement, with: transaction)
+			
 			try self.commitTransaction(transaction)
 			try statement.free()
 			return []
