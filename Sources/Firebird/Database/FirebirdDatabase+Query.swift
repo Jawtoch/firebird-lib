@@ -74,7 +74,7 @@ public extension FirebirdDatabase {
 	
 	func execute(_ statement: FirebirdStatement, with transaction: FirebirdTransaction, inputDescriptorArea: FirebirdDescriptorArea? = nil) throws {
 		var status = FirebirdError.statusArray
-		let descriptorAreaVersion = inputDescriptorArea?.version ?? Firebird.descriptorAreaVersion
+		let descriptorAreaVersion = inputDescriptorArea?.version ?? FirebirdConstants.descriptorAreaVersion
 		
 		try withUnsafePointer(to: inputDescriptorArea?.handle) { pointer in
 			let handle: UnsafePointer<XSQLDA>?

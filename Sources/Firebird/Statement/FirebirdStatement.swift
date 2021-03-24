@@ -70,7 +70,7 @@ public class FirebirdStatement {
 	///   - query: a query string
 	///   - logger: a logger
 	///   - handle: a previous statement handle, or `0` if not
-	public init(_ query: String, dialect: UInt16 = Firebird.dialect, logger: Logger, handle: isc_stmt_handle = 0) {
+	public init(_ query: String, dialect: UInt16 = FirebirdConstants.dialect, logger: Logger, handle: isc_stmt_handle = 0) {
 		self.query = query
 		self.dialect = dialect
 		self.logger = logger
@@ -163,7 +163,7 @@ public class FirebirdStatement {
 	///   - count: number of descriptor variables in the area
 	///   - version: version of the area
 	/// - Returns: an empty descriptor area of given size
-	public func makeDescriptorArea(_ count: Int16, version: Int16 = Firebird.descriptorAreaVersion) -> FirebirdDescriptorArea {
+	public func makeDescriptorArea(_ count: Int16, version: Int16 = FirebirdConstants.descriptorAreaVersion) -> FirebirdDescriptorArea {
 		let pointer = UnsafeMutableRawPointer
 			.allocate(byteCount: FirebirdDescriptorArea.XSQLDA_LENGTH(Int(count)), alignment: 1)
 			.assumingMemoryBound(to: XSQLDA.self)
