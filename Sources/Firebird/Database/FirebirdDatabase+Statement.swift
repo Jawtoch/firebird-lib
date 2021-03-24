@@ -7,10 +7,10 @@
 
 public extension FirebirdDatabase {
 	
-	func prepare(_ statement: FirebirdStatement, with transaction: FirebirdTransaction, dialectVersion: UInt16 = Firebird.dialect) throws {
+	func prepare(_ statement: FirebirdStatement, with transaction: FirebirdTransaction) throws {
 		var status = FirebirdError.statusArray
 		
-		if isc_dsql_prepare(&status, &transaction.handle, &statement.handle, 0, statement.query, dialectVersion, nil) > 0 {
+		if isc_dsql_prepare(&status, &transaction.handle, &statement.handle, 0, statement.query, statement.dialect, nil) > 0 {
 			throw FirebirdError(from: status)
 		}
 		

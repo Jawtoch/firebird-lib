@@ -10,6 +10,23 @@ import XCTest
 
 final class FirebirdTests: XCTestCase {
 	
+	private let configuration = FirebirdConnectionConfiguration(
+		hostname: "localhost",
+		port: 3051,
+		username: "SYSDBA",
+		password: "MASTERKEY",
+		database: "EMPLOYEE")
+	
+	private var connection: FirebirdConnection!
+	
+	override func setUpWithError() throws {
+		self.connection = try FirebirdConnection.connect(configuration)
+	}
+	
+	override func tearDownWithError() throws {
+		try self.connection!.close()
+	}
+	
 	func testConnect() throws {
 		let configuration = FirebirdConnectionConfiguration(
 			hostname: "localhost",
@@ -22,7 +39,26 @@ final class FirebirdTests: XCTestCase {
 		try connection.close()
 	}
 	
-	func testQuery() {
-		
+	func testQuery() throws {
+		self.measure {
+			XCTAssertNoThrow {
+				let rows = try self.connection.query("***REMOVED***")
+				for row in rows {
+					print(row.values)
+				}
+				try self.connection.close()
+			}
+		}
+	}
+	
+	func testQueryEscaping() throws {
+		self.measure {
+			XCTAssertNoThrow {
+				try self.connection.query("***REMOVED***") { row in
+					print(row.values)
+				}
+				try self.connection.close()
+			}
+		}
 	}
 }

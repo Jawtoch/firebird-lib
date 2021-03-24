@@ -143,7 +143,7 @@ public extension Date {
 	/// - Parameter tm_time: a `tm_time` structure
 	init(tm_time: tm) {
 		var copy = tm_time
-		let timestamp = mktime(&copy)
+		let timestamp = timegm(&copy)
 		self.init(timeIntervalSince1970: TimeInterval(timestamp))
 	}
 	
