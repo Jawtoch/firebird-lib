@@ -61,4 +61,10 @@ final class FirebirdTests: XCTestCase {
 			}
 		}
 	}
+
+	static var allTests = [
+		("testConnect", testConnect),
+		("testQuery", testQuery),
+		("testQueryEscaping", testQueryEscaping),
+	]
 }
