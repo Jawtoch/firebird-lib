@@ -11,7 +11,7 @@ let package = Package(
             targets: ["Firebird"]),
     ],
     dependencies: [
-		.package(url: "https://github.com/Jawtoch/firebird-headers.git", from: "0.2.0"),
+		.package(url: "git@github.com:Jawtoch/firebird-headers.git", from: "0.3.1"),
 		.package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     ],
     targets: [
