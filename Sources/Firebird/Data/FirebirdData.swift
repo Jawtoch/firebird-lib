@@ -5,7 +5,7 @@
 //  Created by Ugo Cottin on 10/03/2021.
 //
 
-import Foundation.NSData
+import Foundation
 
 public struct FirebirdData {
 
