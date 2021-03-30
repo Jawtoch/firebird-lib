@@ -10,6 +10,8 @@ public extension FirebirdDatabase {
 	func query(_ query: String, _ binds: [FirebirdData] = [], onRow: @escaping (FirebirdRow) throws -> Void) throws {
 		return try self.withConnection { connection in
 			
+			self.logger.info("Query \(query)")
+			
 			// Create a new transaction
 			let transaction = try self.startTransaction(on: connection)
 			

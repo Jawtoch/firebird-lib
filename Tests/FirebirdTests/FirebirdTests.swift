@@ -40,26 +40,17 @@ final class FirebirdTests: XCTestCase {
 	}
 	
 	func testQuery() throws {
-		self.measure {
-			XCTAssertNoThrow {
-				let rows = try self.connection.query("***REMOVED***")
-				for row in rows {
-					print(row.values)
-				}
-				try self.connection.close()
-			}
+		let rows = try self.connection.query("***REMOVED***")
+		for row in rows {
+			print(row.values)
 		}
 	}
 	
 	func testQueryEscaping() throws {
-		self.measure {
-			XCTAssertNoThrow {
-				try self.connection.query("***REMOVED***") { row in
-					print(row.values)
-				}
-				try self.connection.close()
-			}
+		try self.connection.query("***REMOVED***") { row in
+			print(row.values)
 		}
+		try self.connection.close()
 	}
 
 	static var allTests = [

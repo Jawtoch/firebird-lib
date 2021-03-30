@@ -5,8 +5,6 @@
 //  Created by Ugo Cottin on 23/03/2021.
 //
 
-import FirebirdHeaders
-
 /// Describe an error that occur while operating with the database
 public struct FirebirdError: Error {
 	
