@@ -142,9 +142,26 @@ public extension Date {
 	/// Initialize a date from a `tm_time` structure
 	/// - Parameter tm_time: a `tm_time` structure
 	init(tm_time: tm) {
-		var copy = tm_time
-		let timestamp = timegm(&copy)
-		self.init(timeIntervalSince1970: TimeInterval(timestamp))
+		let calendar = Calendar(identifier: .gregorian)
+		
+		var components = DateComponents()
+		components.calendar = calendar
+		components.year = Int(tm_time.tm_year + 1900)
+		components.month = Int(tm_time.tm_mon + 1)
+		components.day = Int(tm_time.tm_mday)
+		
+		components.hour = Int(tm_time.tm_hour)
+		components.minute = Int(tm_time.tm_min)
+		components.second = Int(tm_time.tm_sec)
+		
+		components.timeZone = TimeZone(abbreviation: "GMT")
+		
+		guard let date = calendar.date(from: components) else {
+			// Throws
+			fatalError()
+		}
+		
+		self = date
 	}
 	
 	/// Get the `tm_time` structure associated to this date
