@@ -40,7 +40,16 @@ final class FirebirdTests: XCTestCase {
 	}
 	
 	func testQuery() throws {
-		let rows = try self.connection.query("***REMOVED***")
+		var value = 263
+		var buffer: Data = Data()
+
+		withUnsafeBytes(of: &value) { uself in
+			buffer.append(contentsOf: uself)
+		}
+		
+		let data = FirebirdData(type: .double, value: buffer)
+		
+		let rows = try self.connection.query("***REMOVED***", [data])
 		for row in rows {
 			print(row.values)
 		}

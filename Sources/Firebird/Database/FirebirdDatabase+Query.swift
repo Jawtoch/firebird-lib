@@ -78,21 +78,14 @@ public extension FirebirdDatabase {
 		var status = FirebirdError.statusArray
 		let descriptorAreaVersion = inputDescriptorArea?.version ?? FirebirdConstants.descriptorAreaVersion
 		
-		try withUnsafePointer(to: inputDescriptorArea?.handle) { pointer in
-			let handle: UnsafePointer<XSQLDA>?
-			if inputDescriptorArea != nil {
-				handle = pointer.withMemoryRebound(to: XSQLDA.self, capacity: 1) { $0 }
-			} else {
-				handle = nil
-			}
-			
-			if isc_dsql_execute(&status, &transaction.handle, &statement.handle, UInt16(descriptorAreaVersion), handle) > 0 {
-				isc_print_status(&status)
-				throw FirebirdError(from: status)
-			}
-			
-			self.logger.info("Statement \(statement) executed")
+		let handle = inputDescriptorArea?.handle
+
+		if isc_dsql_execute(&status, &transaction.handle, &statement.handle, UInt16(descriptorAreaVersion), handle) > 0 {
+			isc_print_status(&status)
+			throw FirebirdError(from: status)
 		}
+		
+		self.logger.info("Statement \(statement) executed")
 	}
 	
 	func fetch(_ statement: FirebirdStatement, outputDescriptorArea: FirebirdDescriptorArea, onRow: @escaping (FirebirdRow) throws -> Void) rethrows {
