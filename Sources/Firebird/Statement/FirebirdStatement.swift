@@ -212,7 +212,7 @@ public class FirebirdStatement {
 		self.logger.info("Describing output of statement \(self), in an area of size \(area.count)")
 		
 		if area.requiredCount > area.count {
-			return try self.describeInput(area.requiredCount)
+			return try self.describeOutput(area.requiredCount)
 		}
 		
 		for variable in area.variables {
@@ -252,7 +252,7 @@ public class FirebirdStatement {
 extension FirebirdStatement: CustomStringConvertible {
 	
 	public var description: String {
-		let maxIndex = self.query.index(self.query.startIndex, offsetBy: max(20, self.query.count))
+		let maxIndex = self.query.index(self.query.startIndex, offsetBy: min(20, self.query.count))
 		var description = String(self.query.prefix(upTo: maxIndex))
 		
 		if maxIndex < self.query.endIndex {
