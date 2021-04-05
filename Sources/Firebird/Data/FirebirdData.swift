@@ -170,7 +170,7 @@ extension FirebirdData {
 		return (Double(value) / scale)
 	}
 	
-	public var short: Int? {
+	public var short: Int16? {
 		guard let value = self.value else {
 			return nil
 		}
@@ -180,7 +180,7 @@ extension FirebirdData {
 		}
 		
 		if let cint = cint {
-			return Int(cint)
+			return Int16(cint)
 		}
 		
 		return nil
