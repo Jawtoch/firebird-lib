@@ -41,7 +41,7 @@ public class FirebirdStoragePool {
 			case .timestamp, .time, .date:
 				variable.dataPointer = self.allocateMemory(for: ISC_TIMESTAMP.self, as: ISC_SCHAR.self)
 			default:
-				fatalError("datatype unsupported")
+				fatalError("datatype unsupported: \(variable.type)")
 		}
 		
 		self.allocatedStorage.append(UnsafeRawPointer(variable.dataPointer))
