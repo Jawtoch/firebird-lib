@@ -141,7 +141,7 @@ public extension Date {
 	
 	/// Initialize a date from a `tm_time` structure
 	/// - Parameter tm_time: a `tm_time` structure
-	init(tm_time: tm) {
+	init?(tm_time: tm) {
 		let calendar = Calendar(identifier: .gregorian)
 		
 		var components = DateComponents()
@@ -156,12 +156,12 @@ public extension Date {
 		
 		components.timeZone = TimeZone(abbreviation: "GMT")
 		
-		guard let date = calendar.date(from: components) else {
-			// Throws
-			fatalError()
+		if let date = calendar.date(from: components) {
+			self = date
+			return
 		}
 		
-		self = date
+		return nil
 	}
 	
 	/// Get the `tm_time` structure associated to this date
