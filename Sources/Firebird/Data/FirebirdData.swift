@@ -108,7 +108,7 @@ extension FirebirdData {
 			return nil
 		}
 		
-		if let str = String(data: value, encoding: .utf8) {
+		if let str = String(data: value, encoding: .utf8) ?? String(data: value, encoding: .ascii) {
 			return str.trimmingCharacters(in: ["\0", " ", "\n", "\r", "\t"])
 		}
 		
