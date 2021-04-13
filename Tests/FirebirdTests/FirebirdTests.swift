@@ -10,15 +10,15 @@ import XCTest
 
 final class FirebirdTests: XCTestCase {
 
-	private let hostname: String! 	= "localhost"
+	private let hostname: String!
 	
-	private let port: UInt16! 		= 3051
+	private let port: UInt16? = nil
 	
-	private let username: String! 	= "SYSDBA"
+	private let username: String!
 	
-	private let password: String! 	= "MASTERKEY"
+	private let password: String!
 	
-	private let database: String!	= "EMPLOYEE"
+	private let database: String!
 	
 	private var configuration: FirebirdConnectionConfiguration {
 		.init(
