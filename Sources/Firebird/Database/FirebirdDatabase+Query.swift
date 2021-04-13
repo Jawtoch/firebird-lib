@@ -7,6 +7,58 @@
 
 public extension FirebirdDatabase {
 	
+	func simpleQuery(_ query: String, _ binds: [FirebirdData] = []) throws {
+		return try self.withConnection { connection in
+			
+			self.logger.info("Query \(query)")
+			
+			// Create a new transaction
+			let transaction = try self.startTransaction(on: connection)
+			
+			// Create a new statement
+			let statement = FirebirdStatement(query, logger: self.logger)
+			
+			// Allocate the statement on the connection
+			try statement.allocate(on: connection)
+			
+			// Prepare the statement with the transaction
+			try self.prepare(statement, with: transaction)
+			
+			let numberOfParameters = query.components(separatedBy: "?").count - 1
+			guard numberOfParameters == binds.count else {
+				throw FirebirdCustomError("Expected \(numberOfParameters) parameters, actual \(binds.count)")
+			}
+			
+			// Getting input descriptor area of the statement
+			let inputArea: FirebirdDescriptorArea?
+			if query.contains("?") {
+				inputArea = try statement.describeInput()
+				
+				for (index, variable) in inputArea!.variables.enumerated() {
+					let bind = binds[index]
+					variable.data = bind.value
+					
+					if variable.nullable {
+						variable.nullIndicatorPointer.pointee = (bind.value == nil ? -1 : 0)
+					}
+				}
+			} else {
+				inputArea = nil
+			}
+	
+			// Execute the statement
+			try self.execute(statement, with: transaction, inputDescriptorArea: inputArea)
+			
+			inputArea?.handle.deallocate()
+			
+			// Closing the statement
+			try statement.free(.drop)
+			
+			// Commit the transaction
+			try self.commitTransaction(transaction)
+		}
+	}
+	
 	func query(_ query: String, _ binds: [FirebirdData] = [], onRow: @escaping (FirebirdRow) throws -> Void) throws {
 		return try self.withConnection { connection in
 			
@@ -46,8 +98,6 @@ public extension FirebirdDatabase {
 				inputArea = nil
 			}
 			
-			// TODO: Bind values
-			
 			// Getting output descriptor area of the statement
 			let outputArea = try statement.describeOutput()
 			
@@ -59,6 +109,9 @@ public extension FirebirdDatabase {
 			
 			// Fetch data using the cursor
 			try self.fetch(statement, outputDescriptorArea: outputArea) { try onRow($0) }
+			
+			inputArea?.handle.deallocate()
+			outputArea.handle.deallocate()
 			
 			// Closing the statement
 			try statement.free()
