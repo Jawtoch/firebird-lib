@@ -4,6 +4,7 @@
 //
 //  Created by Ugo Cottin on 23/03/2021.
 //
+import Foundation
 
 public class FirebirdConnection {
 	
@@ -62,9 +63,22 @@ public class FirebirdConnection {
 		var handle: isc_db_handle = 0
 		
 		logger.info("Establishing connection to \(configuration)…")
-		if isc_attach_database(&status, 0, configuration.databaseURL, &handle, Int16(dpb.count), dpb) > 0 {
-			throw FirebirdError(from: status)
+		
+		var attachRet: ISC_STATUS = 0
+		let work = DispatchWorkItem {
+			attachRet = isc_attach_database(&status, 0, configuration.databaseURL, &handle, Int16(dpb.count), dpb)
 		}
+		
+		DispatchQueue.global(qos: .userInitiated).async(execute: work)
+		if work.wait(timeout: .now() + 10) == .timedOut {
+			throw FirebirdCustomError("timeout")
+		} else {
+			if attachRet > 0 {
+				throw FirebirdError(from: status)
+			}
+		}
+		
+
 		logger.info("Connection established")
 		
 		return FirebirdConnection(logger: logger, handle: handle)
