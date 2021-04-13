@@ -9,8 +9,4 @@ extension FirebirdConnection: FirebirdDatabase {
 	public func withConnection<T>(_ closure: @escaping (FirebirdConnection) throws -> T) rethrows -> T {
 		try closure(self)
 	}
-	
-	public func simpleQuery(_ query: String, _ binds: [FirebirdData] = []) throws {
-		fatalError()
-	}
 }
