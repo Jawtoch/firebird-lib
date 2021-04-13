@@ -86,8 +86,6 @@ extension FirebirdData: CustomStringConvertible {
 				} else {
 					description = nil
 				}
-//			case .blob:
-//				description = self.blob?.description
 			default:
 				description = nil
 		}
@@ -143,19 +141,19 @@ public extension Date {
 	/// - Parameter tm_time: a `tm_time` structure
 	init?(tm_time: tm) {
 		let calendar = Calendar(identifier: .gregorian)
-		
+
 		var components = DateComponents()
 		components.calendar = calendar
 		components.year = Int(tm_time.tm_year + 1900)
 		components.month = Int(tm_time.tm_mon + 1)
 		components.day = Int(tm_time.tm_mday)
-		
+
 		components.hour = Int(tm_time.tm_hour)
 		components.minute = Int(tm_time.tm_min)
 		components.second = Int(tm_time.tm_sec)
-		
-		components.timeZone = TimeZone(abbreviation: "GMT")
-		
+
+		components.timeZone = TimeZone(abbreviation: "UTC")
+
 		if let date = calendar.date(from: components) {
 			self = date
 			return
@@ -167,11 +165,9 @@ public extension Date {
 	/// Get the `tm_time` structure associated to this date
 	var tm_time: tm {
 		var timestamp: time_t = Int(self.timeIntervalSince1970)
-		let c_time: tm = withUnsafePointer(to: &timestamp) { time_ptr in
-			localtime(time_ptr).pointee
+		return withUnsafePointer(to: &timestamp) { pointer in
+			return gmtime(pointer).pointee
 		}
-		
-		return c_time
 	}
 }
 
@@ -179,44 +175,29 @@ extension FirebirdData {
 	
 	public var int64: Double? {
 		// Decimal
-		guard let value = self.long else {
+		guard let value = self.value else {
 			return nil
 		}
+		
+		let scaledOptionalValue = value.withUnsafeBytes { buffer in
+			buffer.bindMemory(to: Double.self).first
+		}
+		
+		guard let scaledValue = scaledOptionalValue else {
+			return nil
+		}
+		
 		let scale = pow(10.0, fabs(Double(self.scale)))
 		
-		return (Double(value) / scale)
+		return (scaledValue / scale)
 	}
 	
 	public var short: Int16? {
-		guard let value = self.value else {
-			return nil
-		}
-		
-		let cint = value.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) in
-			buffer.bindMemory(to: CShort.self).first
-		}
-		
-		if let cint = cint {
-			return Int16(cint)
-		}
-		
-		return nil
+		return self.value?.withUnsafeBytes { $0.bindMemory(to: Int16.self).first }
 	}
 	
-	public var long: Int? {
-		guard let value = self.value else {
-			return nil
-		}
-		
-		let cint = value.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) in
-			buffer.bindMemory(to: Int32.self).first
-		}
-		
-		if let cint = cint {
-			return Int(cint)
-		}
-		
-		return nil
+	public var long: Int32? {
+		return self.value?.withUnsafeBytes { $0.bindMemory(to: Int32.self).first }
 	}
 	
 }
