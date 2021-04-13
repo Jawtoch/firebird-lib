@@ -9,12 +9,16 @@ public struct FirebirdDataType: RawRepresentable, Equatable {
 	
 	public typealias RawValue = Int32
 	
+	/// String of fixed length
 	public static let text = FirebirdDataType(452)
 	
+	/// String of variable length
 	public static let varying = FirebirdDataType(448)
 	
+	/// Signed integer of 16 bits
 	public static let short = FirebirdDataType(500)
 	
+	/// Signed integer of 32 bits
 	public static let long = FirebirdDataType(496)
 	
 	public static let float = FirebirdDataType(482)
@@ -23,6 +27,7 @@ public struct FirebirdDataType: RawRepresentable, Equatable {
 	
 	public static let d_float = FirebirdDataType(530)
 	
+	/// Date and time
 	public static let timestamp = FirebirdDataType(510)
 	
 	public static let blob = FirebirdDataType(520)
@@ -31,8 +36,10 @@ public struct FirebirdDataType: RawRepresentable, Equatable {
 	
 	public static let quad = FirebirdDataType(550)
 	
+	/// Time only
 	public static let time = FirebirdDataType(560)
 	
+	/// Date only
 	public static let date = FirebirdDataType(570)
 	
 	public static let int64 = FirebirdDataType(580)
