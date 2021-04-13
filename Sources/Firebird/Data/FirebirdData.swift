@@ -141,7 +141,6 @@ public extension Date {
 	/// - Parameter tm_time: a `tm_time` structure
 	init?(tm_time: tm) {
 		let calendar = Calendar(identifier: .gregorian)
-
 		var components = DateComponents()
 		components.calendar = calendar
 		components.year = Int(tm_time.tm_year + 1900)

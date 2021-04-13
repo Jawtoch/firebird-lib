@@ -6,7 +6,6 @@
 //
 
 public extension FirebirdDatabase {
-	
 	func simpleQuery(_ query: String, _ binds: [FirebirdData] = []) throws {
 		return try self.withConnection { connection in
 			
@@ -45,7 +44,7 @@ public extension FirebirdDatabase {
 			} else {
 				inputArea = nil
 			}
-	
+
 			// Execute the statement
 			try self.execute(statement, with: transaction, inputDescriptorArea: inputArea)
 			

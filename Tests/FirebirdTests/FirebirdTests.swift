@@ -9,7 +9,7 @@ import XCTest
 @testable import Firebird
 
 final class FirebirdTests: XCTestCase {
-	
+
 	private let hostname: String! 	= "localhost"
 	
 	private let port: UInt16! 		= 3051
