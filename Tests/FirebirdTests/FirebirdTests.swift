@@ -10,12 +10,24 @@ import XCTest
 
 final class FirebirdTests: XCTestCase {
 	
-	private let configuration = FirebirdConnectionConfiguration(
-		hostname: "localhost",
-		port: 3051,
-		username: "SYSDBA",
-		password: "MASTERKEY",
-		database: "EMPLOYEE")
+	private let hostname: String! 	= "localhost"
+	
+	private let port: UInt16! 		= 3051
+	
+	private let username: String! 	= "SYSDBA"
+	
+	private let password: String! 	= "MASTERKEY"
+	
+	private let database: String!	= "EMPLOYEE"
+	
+	private var configuration: FirebirdConnectionConfiguration {
+		.init(
+			hostname: self.hostname,
+			port: self.port,
+			username: self.username,
+			password: self.password,
+			database: self.database)
+	}
 	
 	private var connection: FirebirdConnection!
 	
@@ -24,47 +36,56 @@ final class FirebirdTests: XCTestCase {
 	}
 	
 	override func tearDownWithError() throws {
-		try self.connection!.close()
+		try self.connection?.close()
 	}
 	
 	func testConnect() throws {
-		let configuration = FirebirdConnectionConfiguration(
-			hostname: "localhost",
-			port: 3051,
-			username: "SYSDBA",
-			password: "MASTERKEY",
-			database: "EMPLOYEE")
-		
 		let connection = try FirebirdConnection.connect(configuration)
+		XCTAssertTrue(connection.isOpened)
 		try connection.close()
 	}
 	
-	func testQuery() throws {
-		var value = 263
-		var buffer: Data = Data()
-
-		withUnsafeBytes(of: &value) { uself in
-			buffer.append(contentsOf: uself)
-		}
-		
-		let data = FirebirdData(type: .double, value: buffer)
-		
-		let rows = try self.connection.query("***REMOVED***", [data])
-		for row in rows {
-			print(row.values)
-		}
-	}
-	
-	func testQueryEscaping() throws {
-		try self.connection.query("***REMOVED***") { row in
-			print(row.values)
-		}
+	func testClosingClosedConnection() throws {
+		try self.connection.close()
 		try self.connection.close()
 	}
-
+	
+	func testConnectWithDefaultPort() throws {
+		let configuration = FirebirdConnectionConfiguration(
+			hostname: self.hostname,
+			username: self.username,
+			password: self.password,
+			database: self.database)
+		let connection = try FirebirdConnection.connect(configuration)
+		XCTAssertTrue(connection.isOpened)
+		try connection.close()
+	}
+	
+	func testConnectWithWrongCredentials() throws {
+		let configuration = FirebirdConnectionConfiguration(
+			hostname: self.hostname,
+			port: self.port,
+			username: "Foo",
+			password: "Bar",
+			database: self.database)
+		XCTAssertThrowsError(try FirebirdConnection.connect(configuration))
+	}
+	
+	func testTransaction() throws {
+		let transaction = try self.connection.startTransaction(on: self.connection)
+		XCTAssertTrue(transaction.isOpened)
+		try self.connection.commitTransaction(transaction)
+	}
+	
+	func testRollbackTransaction() throws {
+		let transaction = try self.connection.startTransaction(on: self.connection)
+		XCTAssertTrue(transaction.isOpened)
+		try self.connection.rollbackTransaction(transaction)
+	}
+	
 	static var allTests = [
 		("testConnect", testConnect),
-		("testQuery", testQuery),
-		("testQueryEscaping", testQueryEscaping),
+		("testTransaction", testTransaction),
+		("testRollbackTransaction", testRollbackTransaction),
 	]
 }
