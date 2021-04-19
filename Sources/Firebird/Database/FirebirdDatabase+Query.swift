@@ -147,7 +147,7 @@ public extension FirebirdDatabase {
 		while case let fetchStatus = isc_dsql_fetch(&status, &statement.handle, statement.dialect, outputDescriptorArea.handle), fetchStatus == 0 {
 			var values: [String: FirebirdData] = [:]
 			for variable in outputDescriptorArea.variables {
-				values[variable.name] = FirebirdData(type: variable.type, value:  variable.data)
+				values[variable.name] = FirebirdData(type: variable.type, scale: Int(variable.scale), value:  variable.data)
 			}
 			
 			try onRow(FirebirdRow(index: index, values: values))

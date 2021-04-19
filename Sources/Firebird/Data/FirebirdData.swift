@@ -179,7 +179,7 @@ extension FirebirdData {
 		}
 		
 		let scaledOptionalValue = value.withUnsafeBytes { buffer in
-			buffer.bindMemory(to: Double.self).first
+			buffer.bindMemory(to: Int32.self).first
 		}
 		
 		guard let scaledValue = scaledOptionalValue else {
@@ -188,7 +188,7 @@ extension FirebirdData {
 		
 		let scale = pow(10.0, fabs(Double(self.scale)))
 		
-		return (scaledValue / scale)
+		return (Double(scaledValue) / scale)
 	}
 	
 	public var short: Int16? {
