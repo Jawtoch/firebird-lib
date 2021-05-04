@@ -14,6 +14,6 @@ public extension FirebirdDatabase {
 			throw FirebirdError(from: status)
 		}
 		
-		self.logger.info("Statement \(statement) prepared")
+		self.logger.trace("Statement \(statement) prepared")
 	}
 }

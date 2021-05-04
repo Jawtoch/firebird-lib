@@ -41,11 +41,11 @@ public extension FirebirdDatabase {
 			bufferHandle: &buffer)
 		tebVector.append(block)
 		
-		self.logger.info("Starting a transaction on \(connection)")
+		self.logger.trace("Starting a transaction on \(connection)")
 		if isc_start_multiple(&status, &handle, 1, &tebVector) > 0 || handle <= 0 {
 			throw FirebirdError(from: status)
 		}
-		self.logger.info("Transaction started")
+		self.logger.trace("Transaction started")
 		return FirebirdTransaction(handle: handle)
 	}
 	
@@ -56,7 +56,7 @@ public extension FirebirdDatabase {
 			throw FirebirdError(from: status)
 		}
 		
-		self.logger.info("Transaction \(transaction) commited")
+		self.logger.trace("Transaction \(transaction) commited")
 	}
 	
 	func rollbackTransaction(_ transaction: FirebirdTransaction) throws {
@@ -66,6 +66,6 @@ public extension FirebirdDatabase {
 			throw FirebirdError(from: status)
 		}
 		
-		self.logger.info("Transaction \(transaction) rollback")
+		self.logger.trace("Transaction \(transaction) rollback")
 	}
 }

@@ -51,11 +51,11 @@ public class FirebirdStoragePool {
 		let count = self.allocatedStorage.count
 		self.allocatedStorage.forEach { $0.deallocate() }
 		self.allocatedStorage.removeAll()
-		self.logger.info("Pool release \(count) allocated storages")
+		self.logger.trace("Pool release \(count) allocated storages")
 	}
 
 	private func allocateMemory<T, S>(for type: T.Type, capacity: Int = 1, as: S.Type) -> UnsafeMutablePointer<S> {
-		self.logger.info("Allocating storage for \(type) x\(capacity)")
+		self.logger.trace("Allocating storage for \(type) x\(capacity)")
 		return UnsafeMutableRawPointer
 			.allocate(byteCount: MemoryLayout<T>.stride * capacity, alignment: MemoryLayout<T>.alignment)
 			.assumingMemoryBound(to: S.self)

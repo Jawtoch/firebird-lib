@@ -9,7 +9,7 @@ public extension FirebirdDatabase {
 	func simpleQuery(_ query: String, _ binds: [FirebirdData] = []) throws {
 		return try self.withConnection { connection in
 			
-			self.logger.info("Query \(query)")
+			self.logger.trace("Query \(query)")
 			
 			// Create a new transaction
 			let transaction = try self.startTransaction(on: connection)
@@ -61,7 +61,7 @@ public extension FirebirdDatabase {
 	func query(_ query: String, _ binds: [FirebirdData] = [], onRow: @escaping (FirebirdRow) throws -> Void) throws {
 		return try self.withConnection { connection in
 			
-			self.logger.info("Query \(query)")
+			self.logger.trace("Query \(query)")
 			
 			// Create a new transaction
 			let transaction = try self.startTransaction(on: connection)
@@ -137,7 +137,7 @@ public extension FirebirdDatabase {
 			throw FirebirdError(from: status)
 		}
 		
-		self.logger.info("Statement \(statement) executed")
+		self.logger.trace("Statement \(statement) executed")
 	}
 	
 	func fetch(_ statement: FirebirdStatement, outputDescriptorArea: FirebirdDescriptorArea, onRow: @escaping (FirebirdRow) throws -> Void) rethrows {

@@ -79,11 +79,6 @@ public class FirebirdStatement {
 		self.pool = FirebirdStoragePool(self.logger)
 	}
 	
-	deinit {
-		self.logger.warning("deinit statement")
-//		self.pool.release()
-	}
-	
 	/// Allocate a statement for subsequent use on the database.
 	/// After uses, the statement must be deallocated via `free(_:)`
 	/// - Parameters:
@@ -101,7 +96,7 @@ public class FirebirdStatement {
 			throw FirebirdError(from: status)
 		}
 		
-		self.logger.info("Statement \(self) allocated on connection \(connection)")
+		self.logger.trace("Statement \(self) allocated on connection \(connection)")
 	}
 	
 	/// Allocate a statement for subsequent use on the database.
@@ -121,7 +116,7 @@ public class FirebirdStatement {
 			throw FirebirdError(from: status)
 		}
 		
-		self.logger.info("Statement \(self) allocated on connection \(connection)")
+		self.logger.trace("Statement \(self) allocated on connection \(connection)")
 	}
 	
 	/// Deallocate the statement on the database connection
@@ -135,14 +130,14 @@ public class FirebirdStatement {
 		
 		switch option {
 			case .close:
-				self.logger.info("Closing \(self.cursors.count) cursor(s) on statement \(self)")
+				self.logger.trace("Closing \(self.cursors.count) cursor(s) on statement \(self)")
 			case .drop:
-				self.logger.info("Dropping statement \(self)")
+				self.logger.trace("Dropping statement \(self)")
 				if !self.cursors.isEmpty {
 					self.logger.warning("Dropping statement \(self) with opened cursor(s), please call `free(.close)` before")
 				}
 			default:
-				self.logger.info("Closing \(self.cursors.count) with method \(option)")
+				self.logger.trace("Closing \(self.cursors.count) with method \(option)")
 		}
 		
 		self.pool.release()
@@ -155,7 +150,7 @@ public class FirebirdStatement {
 		
 		self.cursors.removeAll()
 		
-		self.logger.info("Statement \(self) free, \(option)")
+		self.logger.trace("Statement \(self) free, \(option)")
 	}
 	
 	/// Create an empty descriptor area, used to bind or retrieve data from the statement execution
@@ -185,7 +180,7 @@ public class FirebirdStatement {
 		if isc_dsql_describe_bind(&status, &self.handle, UInt16(area.version), area.handle) > 0 {
 			throw FirebirdError(from: status)
 		}
-		self.logger.info("Describing input of statement \(self), in an area of size \(area.count)")
+		self.logger.trace("Describing input of statement \(self), in an area of size \(area.count)")
 		
 		if area.requiredCount > area.count {
 			return try self.describeInput(area.requiredCount)
@@ -209,7 +204,7 @@ public class FirebirdStatement {
 		if isc_dsql_describe(&status, &self.handle, UInt16(area.version), area.handle) > 0 {
 			throw FirebirdError(from: status)
 		}
-		self.logger.info("Describing output of statement \(self), in an area of size \(area.count)")
+		self.logger.trace("Describing output of statement \(self), in an area of size \(area.count)")
 		
 		if area.requiredCount > area.count {
 			return try self.describeOutput(area.requiredCount)
