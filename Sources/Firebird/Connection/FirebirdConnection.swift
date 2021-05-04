@@ -102,3 +102,8 @@ public class FirebirdConnection {
 		self.logger.info("Connection \(self) closed")
 	}
 }
+
+extension FirebirdConnection: CustomStringConvertible {
+	
+	public var description: String { "Connection(handle: \(self.handle))" }
+}
