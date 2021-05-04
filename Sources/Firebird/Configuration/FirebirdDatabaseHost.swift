@@ -5,12 +5,12 @@
 //  Created by Ugo Cottin on 06/03/2021.
 //
 
-import Foundation
-
 public struct FirebirdDatabaseHost: CustomStringConvertible {
 	
+	/// Default Firebird port
 	public static let defaultPort: UInt16 = 3050
 	
+	/// The database server hostname (ip or .local address)
 	let hostname: String
 	private let _port: UInt16?
 	
