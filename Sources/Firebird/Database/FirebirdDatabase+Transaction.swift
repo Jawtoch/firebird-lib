@@ -5,16 +5,10 @@
 //  Created by Ugo Cottin on 23/03/2021.
 //
 
-fileprivate struct teb {
-	var dbHandle: UnsafePointer<isc_db_handle>
-	var bufferLength: CLong
-	var bufferHandle: UnsafePointer<ISC_SCHAR>
-	
-	internal init(dbHandle: UnsafePointer<isc_db_handle>, bufferLength: CLong, bufferHandle: UnsafePointer<ISC_SCHAR>) {
-		self.dbHandle = dbHandle
-		self.bufferLength = bufferLength
-		self.bufferHandle = bufferHandle
-	}
+fileprivate struct ISC_TEB {
+	let dbb_ptr: UnsafePointer<isc_db_handle>
+	let tpb_len: CLong
+	let tpb_ptr: UnsafeBufferPointer<ISC_SCHAR>
 }
 
 public extension FirebirdDatabase {
@@ -29,24 +23,28 @@ public extension FirebirdDatabase {
 			throw FirebirdCustomError("Unable to start a transaction on non opened connection to \(connection)")
 		}
 		
-		var tebVector: [teb] = []
-		var buffer = [ISC_SCHAR(isc_tpb_version3), ISC_SCHAR(isc_tpb_write)]
+		let buffer = [ISC_SCHAR(isc_tpb_version3), ISC_SCHAR(isc_tpb_write)]
 		
 		var status = FirebirdError.statusArray
 		var handle: isc_tr_handle = 0
-		
-		let block = teb(
-			dbHandle: &connection.handle,
-			bufferLength: buffer.count,
-			bufferHandle: &buffer)
-		tebVector.append(block)
-		
-		self.logger.trace("Starting a transaction on \(connection)")
-		if isc_start_multiple(&status, &handle, 1, &tebVector) > 0 || handle <= 0 {
-			throw FirebirdError(from: status)
+
+		return try withUnsafePointer(to: connection.handle) { conn_ptr in
+			try buffer.withUnsafeBufferPointer { buffer_ptr in
+				var tebVector: [ISC_TEB] = []
+				let isc_teb = ISC_TEB(
+					dbb_ptr: conn_ptr,
+					tpb_len: buffer.count,
+					tpb_ptr: buffer_ptr)
+				
+				tebVector.append(isc_teb)
+				
+				if isc_start_multiple(&status, &handle, 1, &tebVector) > 0 || handle <= 0 {
+					throw FirebirdError(from: status)
+				}
+				self.logger.trace("Transaction started")
+				return FirebirdTransaction(handle: handle)
+			}
 		}
-		self.logger.trace("Transaction started")
-		return FirebirdTransaction(handle: handle)
 	}
 	
 	func commitTransaction(_ transaction: FirebirdTransaction) throws {
