@@ -25,5 +25,6 @@ public protocol FirebirdDatabase {
 	/// - Returns: the result rows
 	func query(_ query: String, _ binds: [FirebirdData]) throws -> [FirebirdRow]
 	
+	func withTransaction<T>(_ closure: @escaping(() throws -> T)) throws -> T
 }
 
