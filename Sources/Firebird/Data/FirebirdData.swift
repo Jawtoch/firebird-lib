@@ -179,7 +179,7 @@ extension FirebirdData {
 		}
 		
 		let scaledOptionalValue = value.withUnsafeBytes { buffer in
-			buffer.bindMemory(to: Int32.self).first
+			buffer.bindMemory(to: Double.self).first
 		}
 		
 		guard let scaledValue = scaledOptionalValue else {
