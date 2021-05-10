@@ -5,6 +5,4 @@ RUN apt-get install -y firebird-dev
 
 COPY . .
 
-RUN swift build
-
-ENTRYPOINT ["swift", "test"]
+RUN swift package resolve
