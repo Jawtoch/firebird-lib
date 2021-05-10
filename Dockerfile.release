@@ -6,4 +6,5 @@ RUN apt-get install -y firebird-dev
 COPY . .
 
 RUN swift build -c release
-RUN swift test -c release
+
+ENTRYPOINT ["swift", "test", "-c", "release"]
