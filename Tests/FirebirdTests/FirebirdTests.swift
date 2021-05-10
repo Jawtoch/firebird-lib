@@ -10,15 +10,43 @@ import XCTest
 
 final class FirebirdTests: XCTestCase {
 
-	private let hostname: String!
+	private var hostname: String {
+		guard let hostname = ProcessInfo.processInfo.environment["FB_TEST_HOSTNAME"] else {
+			fatalError("FB_TEST_HOSTNAME is not defined")
+		}
+		
+		return hostname
+	}
 	
-	private let port: UInt16? = nil
+	private var port: UInt16? {
+		guard let port = ProcessInfo.processInfo.environment["FB_TEST_PORT"] else { return nil }
+		
+		return UInt16(port)
+	}
 	
-	private let username: String!
+	private var username: String {
+		guard let username = ProcessInfo.processInfo.environment["FB_TEST_USERNAME"] else {
+			fatalError("FB_TEST_USERNAME is not defined")
+		}
+		
+		return username
+	}
 	
-	private let password: String!
+	private var password: String {
+		guard let password = ProcessInfo.processInfo.environment["FB_TEST_PASSWORD"] else {
+			fatalError("FB_TEST_PASSWORD is not defined")
+		}
+		
+		return password
+	}
 	
-	private let database: String!
+	private var database: String {
+		guard let database = ProcessInfo.processInfo.environment["FB_TEST_DATABASE"] else {
+			fatalError("FB_TEST_DATABASE is not defined")
+		}
+		
+		return database
+	}
 	
 	private var configuration: FirebirdConnectionConfiguration {
 		.init(
@@ -85,6 +113,9 @@ final class FirebirdTests: XCTestCase {
 	
 	static var allTests = [
 		("testConnect", testConnect),
+		("testClosingClosedConnection", testClosingClosedConnection),
+		("testConnectWithDefaultPort", testConnectWithDefaultPort),
+		("testConnectWithWrongCredentials", testConnectWithWrongCredentials),
 		("testTransaction", testTransaction),
 		("testRollbackTransaction", testRollbackTransaction),
 	]
