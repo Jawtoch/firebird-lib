@@ -1,39 +1,8 @@
 # firebird-lib
 
 Firebird Swift Wrapper.
-It require linking the Firebird.framework under macOS, or the Firebird library `fbclient` under Linux. On macOS, `ld` defaults framework search paths are:
+It require Clibfbclient, please see [installation procedure](https://github.com/Jawtoch/Clibfbclient/blob/main/README.md#clibfbclient).
 
-```
-- /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks
-- /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/
-```
-
-Since the Firebird framework is required, I provide a xcframework in the `CFirebird` package, which bundle the `FirebirdCS-2.5.9-27139-x86_64` framework.
-
-Under Linux, simply install the firebird libraries at the default paths:
-
-```
-- Shared libraries: /usr/lib/x86_64-linux-gnu/ 
-- Headers: /usr/include/
-```
-
-Alternatively, you can set the ld search path with the `LD_LIBRARY_PATH` env variable.
-The linux firebird installer install the libraries at `/opt/firebird/lib` by default
-
-```
-LD_LIBRARY_PATH=/opt/firebird/lib/
-export LD_LIBRARY_PATH
-```
-
-If you have a better idea to make this package working under macOS, tell me!
-
-If you don't want to `CFirebird`, you can link against the Firebird framework with giving the framework search path to `ld`.
-
-```
-swift build -Xlinker -F/Library/Frameworks
-```
-
-As Swift Package doesn't allow unsafe linker flags for remote package, I cannot distribute it with this option.
 ## Usage
 
 ### Connection
