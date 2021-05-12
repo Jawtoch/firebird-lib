@@ -178,8 +178,23 @@ extension FirebirdData {
 			return nil
 		}
 		
-		let scaledOptionalValue = value.withUnsafeBytes { buffer in
-			buffer.bindMemory(to: Double.self).first
+		let scaledOptionalValue = value.withUnsafeBytes { buffer -> Int? in
+			var value: Int? = nil
+			if buffer.count <= 2 {
+				if let int16 = buffer.bindMemory(to: Int16.self).first {
+					value = Int(int16)
+				}
+			} else if buffer.count <= 4 {
+				if let int32 = buffer.bindMemory(to: Int32.self).first {
+					value = Int(int32)
+				}
+			} else {
+				if let int64 = buffer.bindMemory(to: Int64.self).first {
+				 value = Int(int64)
+				}
+			}
+			
+			return value
 		}
 		
 		guard let scaledValue = scaledOptionalValue else {
