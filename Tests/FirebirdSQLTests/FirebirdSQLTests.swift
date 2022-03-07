@@ -29,8 +29,20 @@ class FirebirdSQLTests: XCTestCase {
 		}
     }
 	
+	func testCreateDatabase() throws {
+		let dbUrl = "localhost/3050:/firebird/foobar.gdb"
+		var parameters = DatabaseParameters()
+		parameters.append(contentOf: [
+			.version1,
+			.dialect(.compatible),
+			.username("SYSDBA"),
+			.password("SMETHING")
+		])
+		try self.database.create(dbUrl, parameters: parameters)
+	}
+	
 	func testDropDatabase() throws {
-		let dbUrl = "localhost/3050:employee"
+		let dbUrl = "localhost/3050:/firebird/foobar.gdb"
 		try self.database.attach(dbUrl, parameters: self.parameters)
 		XCTAssertTrue(self.database.isAttached)
 		try self.database.drop()
@@ -89,23 +101,4 @@ class FirebirdSQLTests: XCTestCase {
         let informations = try database.getInformations(infos)
 		print(informations)
     }
-    
-    func testDatabaseParameter() throws {
-        var parameters = DatabaseParameters()
-        parameters.append(.version1)
-        parameters.append(contentOf: [
-            .username("SYSDBA"),
-            .password("SMETHING")
-        ])
-        
-        print(parameters.buffer.map { String(format: "%02x", $0) })
-    }
-    
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-
 }

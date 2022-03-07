@@ -28,28 +28,44 @@ struct Database {
 	}
 	
 	mutating func attach(_ database: String, parameters: DatabaseParameters? = nil) throws {
-		var errorArray = FirebirdError.statusArray
+		var status = FirebirdError.statusArray
 		var databaseName = database.cString(using: .utf8)!
 		
 		var result: ISC_STATUS
 		if let parameters = parameters {
 			var buffer = parameters.buffer
-			let bufferLength = Int16(buffer.count)
+			let bufferCount = Int16(buffer.count)
 			result = withUnsafePointer(to: &buffer[0]) { bufferPointer in
-				isc_attach_database(&errorArray, Int16(databaseName.count), &databaseName, &self.handle, bufferLength, bufferPointer)
+				isc_attach_database(&status, Int16(databaseName.count), &databaseName, &self.handle, bufferCount, bufferPointer)
 			}
 		} else {
-			result = isc_attach_database(&errorArray, Int16(databaseName.count), &databaseName, &self.handle, .zero, nil)
+			result = isc_attach_database(&status, Int16(databaseName.count), &databaseName, &self.handle, .zero, nil)
 		}
 		
 		if (result > .zero) {
-			throw FirebirdError(from: errorArray)
+			throw FirebirdError(from: status)
 		}
 	}
 	
 	mutating func detach() throws {
 		var status = FirebirdError.statusArray
 		if isc_detach_database(&status, &self.handle) > .zero {
+			throw FirebirdError(from: status)
+		}
+	}
+	
+	mutating func create(_ database: String, parameters: DatabaseParameters) throws {
+		var status = FirebirdError.statusArray
+		var databaseName = database.cString(using: .utf8)!
+		
+		var buffer = parameters.buffer
+		let bufferCount = Int16(buffer.count)
+		
+		let result = withUnsafePointer(to: &buffer[0]) { bufferPointer in
+			isc_create_database(&status, Int16(databaseName.count), &databaseName, &self.handle, bufferCount, bufferPointer, .zero)
+		}
+		
+		if result > .zero {
 			throw FirebirdError(from: status)
 		}
 	}
@@ -64,14 +80,14 @@ struct Database {
 	mutating func getInformations(_ informations: DatabaseInfos) throws -> [DatabaseInfo: ISC_LONG] {
 		var status = FirebirdError.statusArray
 		var buffer = informations.buffer
-		let bufferSize = Int16(buffer.count)
+		let bufferCount = Int16(buffer.count)
 		
 		let resultSize = 40
 		var informations: [ISC_SCHAR] = Array(repeating: .zero, count: resultSize)
 		
 		let res = withUnsafePointer(to: &buffer[0]) { bufferPointer in
 			withUnsafeMutablePointer(to: &informations[0]) { informationsPointer in
-				isc_database_info(&status, &self.handle, bufferSize, bufferPointer, Int16(resultSize), informationsPointer)
+				isc_database_info(&status, &self.handle, bufferCount, bufferPointer, Int16(resultSize), informationsPointer)
 			}
 		}
 		
