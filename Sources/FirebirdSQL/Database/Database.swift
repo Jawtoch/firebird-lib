@@ -12,13 +12,22 @@ struct Database {
     typealias Handle = isc_db_handle
     
     var handle: Handle
+	
+	var isAttached: Bool {
+		self.handle > 0
+	}
     
     init(_ handle: Handle = .zero) {
         self.handle = handle
     }
     
+	mutating func attach(_ database: String, parameters: [DatabaseParameter]) throws {
+		var databaseParameters = DatabaseParameters()
+		databaseParameters.append(contentOf: parameters)
+		try self.attach(database, parameters: databaseParameters)
+	}
     
-    mutating func attach(_ database: String, parameters: DatabaseParameters?) throws {
+    mutating func attach(_ database: String, parameters: DatabaseParameters? = nil) throws {
         var errorArray = FirebirdError.statusArray
         var databaseName = database.cString(using: .utf8)!
         

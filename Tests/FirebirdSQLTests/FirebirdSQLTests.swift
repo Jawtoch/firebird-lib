@@ -11,13 +11,32 @@ import fbclient
 
 class FirebirdSQLTests: XCTestCase {
 
+	let parameters: [DatabaseParameter] = [
+		.version1,
+		.username("SYSDBA"),
+		.password("SMETHING")
+	]
+	
+	var database: Database!
+	
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+		self.database = Database()
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+		if self.database.isAttached {
+			try self.database.detach()
+		}
     }
+	
+	func testDropDatabase() throws {
+		let dbUrl = "localhost/3050:employee"
+		try self.database.attach(dbUrl, parameters: self.parameters)
+		XCTAssertTrue(self.database.isAttached)
+		try self.database.drop()
+		XCTAssertFalse(self.database.isAttached)
+		XCTAssertThrowsError(try self.database.attach(dbUrl, parameters: self.parameters))
+	}
 
     func testExample() throws {
         var database = Database()
