@@ -9,6 +9,9 @@ let package = Package(
         .library(
             name: "Firebird",
             targets: ["Firebird"]),
+        .library(
+            name: "FirebirdSQL",
+            targets: ["FirebirdSQL"]),
     ],
     dependencies: [
 		.package(url: "https://github.com/Jawtoch/Clibfbclient.git", from: "0.1.0"),
@@ -21,8 +24,17 @@ let package = Package(
 				.product(name: "Logging", package: "swift-log"),
 				.product(name: "Clibfbclient", package: "Clibfbclient")
 			]),
+        .target(
+            name: "FirebirdSQL",
+            dependencies: [
+                .product(name: "Logging", package: "swift-log"),
+                .product(name: "Clibfbclient", package: "Clibfbclient")
+            ]),
 		.testTarget(
 			name: "FirebirdTests",
 			dependencies: ["Firebird"]),
+        .testTarget(
+            name: "FirebirdSQLTests",
+            dependencies: ["FirebirdSQL"]),
     ]
 )

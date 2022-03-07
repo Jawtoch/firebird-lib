@@ -110,6 +110,15 @@ final class FirebirdTests: XCTestCase {
 		XCTAssertTrue(transaction.isOpened)
 		try self.connection.rollbackTransaction(transaction)
 	}
+    
+    func testQuery() throws {
+        try self.connection.query("SELECT emp_firstname FROM employee") { row in
+            for (column, dataConvertible) in row.values {
+                let firstName = String(dataConvertible.data!, using: dataConvertible.context) ?? "<empty>"
+                print(row.index, column, firstName.replacingOccurrences(of: " ", with: "."))
+            }
+        }
+    }
 	
 	static var allTests = [
 		("testConnect", testConnect),

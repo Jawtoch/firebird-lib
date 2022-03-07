@@ -5,6 +5,8 @@
 //  Created by Ugo Cottin on 23/03/2021.
 //
 
+import Foundation
+
 public extension FirebirdDatabase {
 	func simpleQuery(_ query: String, _ binds: [FirebirdData] = []) throws {
 		return try self.withConnection { connection in
@@ -58,7 +60,7 @@ public extension FirebirdDatabase {
 		}
 	}
 	
-	func query(_ query: String, _ binds: [FirebirdData] = [], onRow: @escaping (FirebirdRow) throws -> Void) throws {
+	func query(_ query: String, _ binds: [DataConvertible] = [], onRow: @escaping (FirebirdRow) throws -> Void) throws {
 		return try self.withConnection { connection in
 			
 			self.logger.trace("Query \(query)")
@@ -86,11 +88,18 @@ public extension FirebirdDatabase {
 				inputArea = try statement.describeInput()
 				
 				for (index, variable) in inputArea!.variables.enumerated() {
+                    let context = DataConvertionContext(
+                        dataType: variable.type,
+                        scale: variable.scale,
+                        size: variable.size,
+                        nullable: variable.nullable)
+                    
 					let bind = binds[index]
-					variable.data = bind.value
+                    let bindValue = bind.data(accordingTo: context)
+					variable.data = bindValue
 					
 					if variable.nullable {
-						variable.nullIndicatorPointer.pointee = (bind.value == nil ? -1 : 0)
+						variable.nullIndicatorPointer.pointee = (bindValue == nil ? -1 : 0)
 					}
 				}
 			} else {
@@ -120,7 +129,7 @@ public extension FirebirdDatabase {
 		}
 	}
 	
-	func query(_ query: String, _ binds: [FirebirdData] = []) throws -> [FirebirdRow] {
+	func query(_ query: String, _ binds: [DataConvertible] = []) throws -> [FirebirdRow] {
 		var rows: [FirebirdRow] = []
 		try self.query(query, binds) { rows.append($0) }
 		return rows
@@ -145,9 +154,14 @@ public extension FirebirdDatabase {
 		var index = 0
 		
 		while case let fetchStatus = isc_dsql_fetch(&status, &statement.handle, statement.dialect, outputDescriptorArea.handle), fetchStatus == 0 {
-			var values: [String: FirebirdData] = [:]
+			var values: [String: (DataConvertionContext, Data?)] = [:]
 			for variable in outputDescriptorArea.variables {
-				values[variable.name] = FirebirdData(type: variable.type, scale: Int(variable.scale), value:  variable.data)
+                let context = DataConvertionContext(
+                    dataType: variable.type,
+                    scale: variable.scale,
+                    size: variable.size,
+                    nullable: variable.nullable)
+                values[variable.name] = (context, variable.data)
 			}
 			
 			try onRow(FirebirdRow(index: index, values: values))

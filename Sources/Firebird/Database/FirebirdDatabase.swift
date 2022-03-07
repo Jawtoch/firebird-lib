@@ -23,7 +23,7 @@ public protocol FirebirdDatabase {
 	///   - query: a query string
 	///   - binds: query parameters
 	/// - Returns: the result rows
-	func query(_ query: String, _ binds: [FirebirdData]) throws -> [FirebirdRow]
+	func query(_ query: String, _ binds: [DataConvertible]) throws -> [FirebirdRow]
 	
 	func withTransaction<T>(_ closure: @escaping(() throws -> T)) throws -> T
 }
