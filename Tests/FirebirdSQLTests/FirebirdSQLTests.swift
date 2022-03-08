@@ -101,4 +101,20 @@ class FirebirdSQLTests: XCTestCase {
         let informations = try database.getInformations(infos)
 		print(informations)
     }
+	
+	func testStartTransaction() throws {
+		var database = Database()
+		try database.attach("localhost/3050:employee", parameters: self.parameters)
+		
+		var transaction = Transaction()
+		transaction.addOptions([
+			Int8(isc_tpb_version3),
+			Int8(isc_tpb_write),
+			Int8(isc_tpb_concurrency),
+			Int8(isc_tpb_wait)
+		])
+		
+		try transaction.start(on: database)
+		XCTAssertGreaterThan(transaction.handle, 0)
+	}
 }
