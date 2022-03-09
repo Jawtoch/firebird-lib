@@ -36,9 +36,8 @@ struct Transaction {
 		
 	}
 	
-	mutating func start(on database: Database) throws {
+	mutating func start(on database: FirebirdDatabase) throws {
 		var status = FirebirdError.statusArray
-		var database = database
 		
 		try withUnsafePointer(to: &database.handle) { databaseHandle in
 			let optionsCount = self.options.count

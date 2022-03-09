@@ -11,16 +11,17 @@ import fbclient
 
 class FirebirdSQLTests: XCTestCase {
 
-	let parameters: [DatabaseParameter] = [
-		.version1,
-		.username("SYSDBA"),
-		.password("SMETHING")
-	]
-	
-	var database: Database!
+	var database: FirebirdDatabase!
 	
     override func setUpWithError() throws {
-		self.database = Database()
+		let database = FirebirdDatabase()
+		database.addOptions([
+			Version1FirebirdDatabaseOption(),
+			DialectFirebirdDatabaseOption(.v6),
+			UsernameFirebirdDatabaseOption("SYSDBA"),
+			PasswordFirebirdDatabaseOption("SMETHING")
+		])
+		self.database = database
     }
 
     override func tearDownWithError() throws {
@@ -31,35 +32,26 @@ class FirebirdSQLTests: XCTestCase {
 	
 	func testCreateDatabase() throws {
 		let dbUrl = "localhost/3050:/firebird/foobar.gdb"
-		var parameters = DatabaseParameters()
-		parameters.append(contentOf: [
-			.version1,
-			.dialect(.compatible),
-			.username("SYSDBA"),
-			.password("SMETHING")
-		])
-		try self.database.create(dbUrl, parameters: parameters)
+		try self.database.create(dbUrl)
+		XCTAssertTrue(self.database.isAttached)
 	}
 	
 	func testDropDatabase() throws {
 		let dbUrl = "localhost/3050:/firebird/foobar.gdb"
-		try self.database.attach(dbUrl, parameters: self.parameters)
+		try self.database.attach(dbUrl)
 		XCTAssertTrue(self.database.isAttached)
 		try self.database.drop()
 		XCTAssertFalse(self.database.isAttached)
-		XCTAssertThrowsError(try self.database.attach(dbUrl, parameters: self.parameters))
+		XCTAssertThrowsError(try self.database.attach(dbUrl))
+	}
+	
+	func testAttachDatabase() throws {
+		try self.database.attach("localhost/3050:employee")
+		XCTAssertTrue(self.database.isAttached)
 	}
 
     func testExample() throws {
-        var database = Database()
-        var parameters = DatabaseParameters()
-        parameters.append(contentOf: [
-            .version1,
-            .username("SYSDBA"),
-            .password("SMETHING")
-        ])
-        
-        try database.attach("localhost/3050:/firebird/db0.gdb", parameters: parameters)
+        try database.attach("localhost/3050:/firebird/db0.gdb")
         
         var infos = DatabaseInfos()
         infos.append(contentOf: [
@@ -103,8 +95,8 @@ class FirebirdSQLTests: XCTestCase {
     }
 	
 	func testStartTransaction() throws {
-		var database = Database()
-		try database.attach("localhost/3050:employee", parameters: self.parameters)
+		let database = FirebirdDatabase()
+		try database.attach("localhost/3050:employee")
 		
 		var transaction = Transaction()
 		transaction.addOptions([
