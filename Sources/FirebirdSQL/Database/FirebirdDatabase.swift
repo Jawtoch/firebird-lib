@@ -70,6 +70,7 @@ class FirebirdDatabase: Database {
 		}
 	}
 	
+	// TODO: Rewrite me!
 	func getInformations(_ informations: DatabaseInfos) throws -> [DatabaseInfo: ISC_LONG] {
 		var buffer = informations.buffer
 		let bufferCount = Int16(buffer.count)
