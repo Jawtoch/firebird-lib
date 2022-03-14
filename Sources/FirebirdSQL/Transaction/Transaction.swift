@@ -6,6 +6,8 @@
 //
 
 protocol Transaction {
+    
+    associatedtype Database: FirebirdSQL.Database
 	
 	func prepare() throws
 	

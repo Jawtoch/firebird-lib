@@ -7,7 +7,9 @@
 
 import Foundation
 
-public protocol Statement {
+protocol Statement {
+    
+    associatedtype Database: FirebirdSQL.Database
     
     func close()
     

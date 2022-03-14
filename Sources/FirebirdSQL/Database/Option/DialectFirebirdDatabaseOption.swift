@@ -15,17 +15,17 @@ struct DialectFirebirdDatabaseOption: FirebirdDatabaseOption {
 		case v6 = 3
 	}
 	
-	private let dialect: Dialect
+	let value: Dialect
 	
 	var description: String {
-		"Dialect \(self.dialect)"
+		"Dialect \(self.value)"
 	}
 	
 	var buffer: [Element] {
-		[Element(isc_dpb_sql_dialect), 1, Element(self.dialect.rawValue)]
+		[Element(isc_dpb_sql_dialect), 1, Element(self.value.rawValue)]
 	}
 	
 	init(_ dialect: Dialect) {
-		self.dialect = dialect
+		self.value = dialect
 	}
 }

@@ -8,7 +8,11 @@
 import fbclient
 
 class FirebirdDatabase: Database {
-	
+    typealias Statement = FirebirdStatement
+    
+    typealias Transaction = FirebirdTransaction
+    
+    
 	var handle: isc_db_handle
 	
 	var status: [ISC_STATUS]
@@ -69,6 +73,13 @@ class FirebirdDatabase: Database {
 			throw FirebirdError(from: self.status)
 		}
 	}
+    
+    // MARK: Transaction
+    func startTransaction() throws -> FirebirdTransaction {
+        let transaction = FirebirdTransaction()
+        try transaction.start(on: self)
+        return transaction
+    }
 	
 	// TODO: Rewrite me!
 	func getInformations(_ informations: DatabaseInfos) throws -> [DatabaseInfo: ISC_LONG] {
@@ -115,4 +126,18 @@ class FirebirdDatabase: Database {
 		
 		return parsedInformations
 	}
+    
+    // MARK: Query
+    func execute(_ query: String) throws {
+        var queryCString = query.cString(using: .utf8)!
+        let transaction = try self.startTransaction()
+        
+        guard let dialect = self.options.first(where: { $0 is DialectFirebirdDatabaseOption }) else {
+            return
+        }
+        
+
+        isc_dsql_execute_immediate(&self.status, &self.handle, &transaction.handle, .zero, &queryCString, dialect.value, <#T##UnsafePointer<XSQLDA>!#>)
+
+    }
 }

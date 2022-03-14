@@ -39,11 +39,7 @@ class FirebirdTransaction: Transaction {
 		}
 	}
 	
-	func start(on database: Database) throws {
-		guard let database = database as? FirebirdDatabase else {
-			fatalError()
-		}
-		
+	func start(on database: FirebirdDatabase) throws {		
 		let optionsBuffer = self.options.flatMap { $0.buffer }
 		let optionsCount = optionsBuffer.count
 		

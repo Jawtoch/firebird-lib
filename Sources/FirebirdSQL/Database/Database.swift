@@ -6,6 +6,10 @@
 //
 
 protocol Database {
+    
+    associatedtype Statement: FirebirdSQL.Statement
+    
+    associatedtype Transaction: FirebirdSQL.Transaction
 	
 	var isAttached: Bool { get }
 	
@@ -17,4 +21,6 @@ protocol Database {
 	
 	func drop() throws
 	
+    // MARK: Transaction
+    func startTransaction() throws -> Transaction
 }
