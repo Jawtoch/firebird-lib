@@ -98,13 +98,14 @@ class FirebirdSQLTests: XCTestCase {
 		let database = FirebirdDatabase()
 		try database.attach("localhost/3050:employee")
 		
-		var transaction = Transaction()
-		transaction.addOptions([
+		let transaction = FirebirdTransaction()
+		transaction.addOption(Version3FirebirdTransactionOption())
+		/*transaction.addOptions([
 			Int8(isc_tpb_version3),
 			Int8(isc_tpb_write),
 			Int8(isc_tpb_concurrency),
 			Int8(isc_tpb_wait)
-		])
+		])*/
 		
 		try transaction.start(on: database)
 		XCTAssertGreaterThan(transaction.handle, 0)
