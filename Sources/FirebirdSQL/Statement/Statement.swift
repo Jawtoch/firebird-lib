@@ -7,15 +7,8 @@
 
 import Foundation
 
-protocol Statement {
+protocol Statement: AnyObject {
     
     associatedtype Database: FirebirdSQL.Database
-    
-    func close()
-    
-    func closeCursor()
-    
-    func unprepare()
-    
-    
+
 }

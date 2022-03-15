@@ -7,7 +7,7 @@
 
 import fbclient
 
-class FirebirdTransaction: Transaction {
+class FirebirdTransaction {
 	
 	var handle: isc_tr_handle
 	
@@ -21,7 +21,7 @@ class FirebirdTransaction: Transaction {
 	
 	init() {
 		self.handle = 0
-		self.status = FirebirdError.statusArray
+		self.status = FirebirdVectorError.vector
 		self.options = []
 	}
 	
@@ -35,7 +35,7 @@ class FirebirdTransaction: Transaction {
 	
 	func prepare() throws {
 		if isc_prepare_transaction(&self.status, &self.handle) > 0 {
-			throw FirebirdError(from: self.status)
+			throw FirebirdVectorError(from: self.status)
 		}
 	}
 	
@@ -60,7 +60,7 @@ class FirebirdTransaction: Transaction {
 					}
 					
 					if isc_start_multiple(&self.status, &self.handle, Int16(blocksCount), blocksAddress) > 0 {
-						throw FirebirdError(from: status)
+						throw FirebirdVectorError(from: status)
 					}
 				}
 			}
@@ -69,13 +69,13 @@ class FirebirdTransaction: Transaction {
 	
 	func commit() throws {
 		if isc_commit_transaction(&self.status, &self.handle) > 0 {
-			throw FirebirdError(from: self.status)
+			throw FirebirdVectorError(from: self.status)
 		}
 	}
 	
 	func rollback() throws {
 		if isc_rollback_transaction(&self.status, &self.handle) > 0 {
-			throw FirebirdError(from: self.status)
+			throw FirebirdVectorError(from: self.status)
 		}
 	}
 }

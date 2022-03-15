@@ -8,31 +8,21 @@
 import fbclient
 
 
-class FirebirdStatement: Statement {
+protocol FirebirdStatement: AnyObject {
+		
+	var handle: isc_stmt_handle { get set }
     
-    var handle: isc_stmt_handle
-    
-    var status: [ISC_STATUS]
-    
-    init() {
-        self.handle = 0
-        self.status = FirebirdError.statusArray
-    }
-    
-    func close() {
-        
-    }
-    
-    func closeCursor() {
-        
-    }
-    
-    func unprepare() {
-        
-    }
-    
-    
-    typealias Database = FirebirdDatabase
-    
-    
+	var status: [ISC_STATUS] { get }
+	
+	var query: String { get }
+	
+	var dialect: UInt16 { get }
+	
+	func allocate(on database: FirebirdDatabase) throws
+	
+	func prepare(with transaction: FirebirdTransaction) throws
+
+	func executeImmediate(on database: FirebirdDatabase, transaction: FirebirdTransaction) throws
+	
+	func execute(with transaction: FirebirdTransaction) throws
 }

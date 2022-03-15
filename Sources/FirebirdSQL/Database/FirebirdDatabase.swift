@@ -7,8 +7,8 @@
 
 import fbclient
 
-class FirebirdDatabase: Database {
-    typealias Statement = FirebirdStatement
+class FirebirdDatabase {
+	typealias Statement = FirebirdStatement
     
     typealias Transaction = FirebirdTransaction
     
@@ -25,7 +25,7 @@ class FirebirdDatabase: Database {
 	
 	init() {
 		self.handle = 0
-		self.status = FirebirdError.statusArray
+		self.status = FirebirdVectorError.vector
 		self.options = []
 	}
 	
@@ -44,14 +44,14 @@ class FirebirdDatabase: Database {
 		let bufferCount = Int16(buffer.count)
 		try withUnsafePointer(to: &buffer[0]) { bufferPointer in
 			if isc_attach_database(&self.status, Int16(cDatabaseName.count), &cDatabaseName, &self.handle, bufferCount, bufferPointer) > 0 {
-				throw FirebirdError(from: self.status)
+				throw FirebirdVectorError(from: self.status)
 			}
 		}
 	}
 	
 	func detach() throws {
 		if isc_detach_database(&self.status, &self.handle) > 0 {
-			throw FirebirdError(from: self.status)
+			throw FirebirdVectorError(from: self.status)
 		}
 	}
 	
@@ -63,14 +63,14 @@ class FirebirdDatabase: Database {
 		
 		try withUnsafePointer(to: &buffer[0]) { bufferPointer in
 			if isc_create_database(&self.status, Int16(cDatabaseName.count), &cDatabaseName, &self.handle, bufferCount, bufferPointer, .zero) > 0 {
-				throw FirebirdError(from: self.status)
+				throw FirebirdVectorError(from: self.status)
 			}
 		}
 	}
 	
 	func drop() throws {
 		if isc_drop_database(&self.status, &self.handle) > 0 {
-			throw FirebirdError(from: self.status)
+			throw FirebirdVectorError(from: self.status)
 		}
 	}
     
@@ -96,7 +96,7 @@ class FirebirdDatabase: Database {
 		}
 		
 		if (res > .zero) {
-			throw FirebirdError(from: self.status)
+			throw FirebirdVectorError(from: self.status)
 		}
 		
 		var parsedInformations: [DatabaseInfo: ISC_LONG] = [:]
@@ -126,18 +126,25 @@ class FirebirdDatabase: Database {
 		
 		return parsedInformations
 	}
-    
-    // MARK: Query
-    func execute(_ query: String) throws {
-        var queryCString = query.cString(using: .utf8)!
-        let transaction = try self.startTransaction()
-        
-        guard let dialect = self.options.first(where: { $0 is DialectFirebirdDatabaseOption }) else {
-            return
-        }
-        
 
-        isc_dsql_execute_immediate(&self.status, &self.handle, &transaction.handle, .zero, &queryCString, dialect.value, <#T##UnsafePointer<XSQLDA>!#>)
-
-    }
+	// MARK: Statement
+	func executeImmediate(_ statement: FirebirdStatement) throws {
+		let transaction = FirebirdTransaction()
+		do {
+			try statement.executeImmediate(on: self, transaction: transaction)
+			try transaction.commit()
+		} catch {
+			try transaction.rollback()
+		}
+	}
+	
+	func execute(_ statement: FirebirdStatement) throws {
+		let transaction = FirebirdTransaction()
+		do {
+			try statement.execute(with: transaction)
+			try transaction.commit()
+		} catch {
+			try transaction.rollback()
+		}
+	}
 }
