@@ -17,7 +17,9 @@ struct FirebirdVectorError {
 	
 	let sqlMessage: String
 	
-	let messages: [String]
+	let message: String
+	
+	let detais: [String]
 	
 	let vector: [ISC_STATUS]
 	
@@ -34,34 +36,38 @@ struct FirebirdVectorError {
 			return String(cString: messagePointer)
 		}
 		
-		self.messages = withUnsafePointer(to: &vector[0]) { vectorPointer in
+		let messages = withUnsafePointer(to: &vector[0]) { vectorPointer -> [String] in
 			var vectorPointer = Optional(vectorPointer)
 			return withUnsafeMutablePointer(to: &vectorPointer) { pvector in
 				withUnsafeMutablePointer(to: &messageBuffer[0]) { messagePointer in
-					fb_interpret(messagePointer, UInt32(messageSize), pvector)
-					var messages: [String] = [String(cString: messagePointer)]
+					var messages: [String] = []
 					
 					while fb_interpret(messagePointer, UInt32(messageSize), pvector) > 0 {
-						messages.append("- \(String(cString: messagePointer))")
+						messages.append("\(String(cString: messagePointer))")
 					}
 					
 					return messages
 				}
 			}
 		}
+		
+		self.message = messages.first ?? ""
+		self.detais = Array(messages.dropFirst())
 	}
 }
 
 extension FirebirdVectorError: FirebirdError {
 	
 	var reason: String {
-		self.messages.joined(separator: "\n")
+		self.message
 	}
 	
 	var description: String {
 		"""
-		SQL: code \(self.sqlCode) - \(self.sqlMessage)
-		\(self.messages.joined(separator: "\n"))
+		Error \(self.sqlCode): \(self.sqlMessage)
+		Reason: \(self.reason)
+		Details:
+		\(self.detais.map({ "- \($0)" }).joined(separator: "\n"))
 		"""
 	}
 	
