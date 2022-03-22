@@ -183,7 +183,9 @@ public class FirebirdStatement {
 		self.logger.trace("Describing input of statement \(self), in an area of size \(area.count)")
 		
 		if area.requiredCount > area.count {
-			return try self.describeInput(area.requiredCount)
+			let requiredCount = area.requiredCount
+			area.handle.deallocate()
+			return try self.describeInput(requiredCount)
 		}
 		
 		for variable in area.variables {
@@ -207,7 +209,9 @@ public class FirebirdStatement {
 		self.logger.trace("Describing output of statement \(self), in an area of size \(area.count)")
 		
 		if area.requiredCount > area.count {
-			return try self.describeOutput(area.requiredCount)
+			let requiredCount = area.requiredCount
+			area.handle.deallocate()
+			return try self.describeOutput(requiredCount)
 		}
 		
 		for variable in area.variables {
