@@ -35,7 +35,7 @@ public class FirebirdConnection {
 	/// - Throws: if an error occur while connecting to the database
 	/// - Returns: a connection to the database
 	public static func connect(_ configuration: FirebirdConnectionConfiguration, logger: Logger = Logger(label: "logging.firebird")) throws -> FirebirdConnection {
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		
 		var dpb: [ISC_SCHAR] = []
 		dpb.append(ISC_SCHAR(isc_dpb_version1))
@@ -71,10 +71,10 @@ public class FirebirdConnection {
 		
 		DispatchQueue.global(qos: .userInitiated).async(execute: work)
 		if work.wait(timeout: .now() + 10) == .timedOut {
-			throw FirebirdCustomError("timeout")
+			throw FirebirdCustomError(reason: "timeout")
 		} else {
 			if attachRet > 0 {
-				throw FirebirdError(from: status)
+				throw FirebirdVectorError(from: status)
 			}
 		}
 		
@@ -92,11 +92,11 @@ public class FirebirdConnection {
 			return
 		}
 		
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		self.logger.info("Closing connection \(self)")
 		
 		if isc_detach_database(&status, &self.handle) > 0 {
-			throw FirebirdError(from: status)
+			throw FirebirdVectorError(from: status)
 		}
 		
 		self.logger.info("Connection \(self) closed")

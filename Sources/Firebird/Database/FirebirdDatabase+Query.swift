@@ -27,7 +27,7 @@ public extension FirebirdDatabase {
 			
 			let numberOfParameters = query.components(separatedBy: "?").count - 1
 			guard numberOfParameters == binds.count else {
-				throw FirebirdCustomError("Expected \(numberOfParameters) parameters, actual \(binds.count)")
+				throw FirebirdCustomError(reason: "Expected \(numberOfParameters) parameters, actual \(binds.count)")
 			}
 			
 			// Getting input descriptor area of the statement
@@ -79,7 +79,7 @@ public extension FirebirdDatabase {
 			
 			let numberOfParameters = query.components(separatedBy: "?").count - 1
 			guard numberOfParameters == binds.count else {
-				throw FirebirdCustomError("Expected \(numberOfParameters) parameters, actual \(binds.count)")
+				throw FirebirdCustomError(reason: "Expected \(numberOfParameters) parameters, actual \(binds.count)")
 			}
 			
 			// Getting input descriptor area of the statement
@@ -136,21 +136,21 @@ public extension FirebirdDatabase {
 	}
 	
 	func execute(_ statement: FirebirdStatement, with transaction: FirebirdTransaction, inputDescriptorArea: FirebirdDescriptorArea? = nil) throws {
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		let descriptorAreaVersion = inputDescriptorArea?.version ?? FirebirdConstants.descriptorAreaVersion
 		
 		let handle = inputDescriptorArea?.handle
 
 		if isc_dsql_execute(&status, &transaction.handle, &statement.handle, UInt16(descriptorAreaVersion), handle) > 0 {
 			isc_print_status(&status)
-			throw FirebirdError(from: status)
+			throw FirebirdVectorError(from: status)
 		}
 		
 		self.logger.trace("Statement \(statement) executed")
 	}
 	
 	func fetch(_ statement: FirebirdStatement, outputDescriptorArea: FirebirdDescriptorArea, onRow: @escaping (FirebirdRow) throws -> Void) rethrows {
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		var index = 0
 		
 		while case let fetchStatus = isc_dsql_fetch(&status, &statement.handle, statement.dialect, outputDescriptorArea.handle), fetchStatus == 0 {

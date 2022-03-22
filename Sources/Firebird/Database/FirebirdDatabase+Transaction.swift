@@ -20,12 +20,12 @@ public extension FirebirdDatabase {
 		
 		guard connection.isOpened else {
 			self.logger.warning("Trying to start a transaction on non opened connection")
-			throw FirebirdCustomError("Unable to start a transaction on non opened connection to \(connection)")
+			throw FirebirdCustomError(reason: "Unable to start a transaction on non opened connection to \(connection)")
 		}
 		
 		let buffer = [ISC_SCHAR(isc_tpb_version3), ISC_SCHAR(isc_tpb_write)]
 		
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		var handle: isc_tr_handle = 0
 
 		return try withUnsafePointer(to: connection.handle) { conn_ptr in
@@ -39,7 +39,7 @@ public extension FirebirdDatabase {
 				tebVector.append(isc_teb)
 				
 				if isc_start_multiple(&status, &handle, 1, &tebVector) > 0 || handle <= 0 {
-					throw FirebirdError(from: status)
+					throw FirebirdVectorError(from: status)
 				}
 				self.logger.trace("Transaction started")
 				return FirebirdTransaction(handle: handle)
@@ -48,20 +48,20 @@ public extension FirebirdDatabase {
 	}
 	
 	func commitTransaction(_ transaction: FirebirdTransaction) throws {
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		
 		if isc_commit_transaction(&status, &transaction.handle) > 0 {
-			throw FirebirdError(from: status)
+			throw FirebirdVectorError(from: status)
 		}
 		
 		self.logger.trace("Transaction \(transaction) commited")
 	}
 	
 	func rollbackTransaction(_ transaction: FirebirdTransaction) throws {
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		
 		if isc_rollback_transaction(&status, &transaction.handle) > 0 {
-			throw FirebirdError(from: status)
+			throw FirebirdVectorError(from: status)
 		}
 		
 		self.logger.trace("Transaction \(transaction) rollback")

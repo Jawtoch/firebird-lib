@@ -90,10 +90,10 @@ public class FirebirdStatement {
 			return
 		}
 		
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		
 		if isc_dsql_allocate_statement(&status, &connection.handle, &self.handle) > 0 {
-			throw FirebirdError(from: status)
+			throw FirebirdVectorError(from: status)
 		}
 		
 		self.logger.trace("Statement \(self) allocated on connection \(connection)")
@@ -110,10 +110,10 @@ public class FirebirdStatement {
 			return
 		}
 		
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		
 		if isc_dsql_alloc_statement2(&status, &connection.handle, &self.handle) > 0 {
-			throw FirebirdError(from: status)
+			throw FirebirdVectorError(from: status)
 		}
 		
 		self.logger.trace("Statement \(self) allocated on connection \(connection)")
@@ -142,10 +142,10 @@ public class FirebirdStatement {
 		
 		self.pool.release()
 		
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		
 		if isc_dsql_free_statement(&status, &self.handle, UInt16(option.rawValue)) > 0 {
-			throw FirebirdError(from: status)
+			throw FirebirdVectorError(from: status)
 		}
 		
 		self.cursors.removeAll()
@@ -175,10 +175,10 @@ public class FirebirdStatement {
 	/// - Returns: a descriptor area with allocated descriptor variables
 	public func describeInput(_ count: Int16 = 10) throws -> FirebirdDescriptorArea {
 		let area = self.makeDescriptorArea(count)
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		
 		if isc_dsql_describe_bind(&status, &self.handle, UInt16(area.version), area.handle) > 0 {
-			throw FirebirdError(from: status)
+			throw FirebirdVectorError(from: status)
 		}
 		self.logger.trace("Describing input of statement \(self), in an area of size \(area.count)")
 		
@@ -199,10 +199,10 @@ public class FirebirdStatement {
 	/// - Returns: a descriptor area with allocated descriptor variables
 	public func describeOutput(_ count: Int16 = 10) throws -> FirebirdDescriptorArea {
 		let area = self.makeDescriptorArea(count)
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		
 		if isc_dsql_describe(&status, &self.handle, UInt16(area.version), area.handle) > 0 {
-			throw FirebirdError(from: status)
+			throw FirebirdVectorError(from: status)
 		}
 		self.logger.trace("Describing output of statement \(self), in an area of size \(area.count)")
 		
@@ -225,17 +225,17 @@ public class FirebirdStatement {
 		
 		guard self.isAllocated else {
 			self.logger.error("Unable to open cursor on non allocated statement \(self)")
-			throw FirebirdCustomError("Unable to open cursor on non allocated statement \(self)")
+			throw FirebirdCustomError(reason: "Unable to open cursor on non allocated statement \(self)")
 		}
 		
 		guard !self.cursors.contains(where: { $0.name == name }) else {
-			throw FirebirdCustomError("The statement \(self) already have a cursor named \(name)")
+			throw FirebirdCustomError(reason: "The statement \(self) already have a cursor named \(name)")
 		}
 		
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		
 		if isc_dsql_set_cursor_name(&status, &self.handle, name, .zero) > 0 {
-			throw FirebirdError(from: status)
+			throw FirebirdVectorError(from: status)
 		}
 		
 		let cursor = Cursor(name: name)

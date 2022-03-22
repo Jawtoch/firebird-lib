@@ -8,10 +8,10 @@
 public extension FirebirdDatabase {
 	
 	func prepare(_ statement: FirebirdStatement, with transaction: FirebirdTransaction) throws {
-		var status = FirebirdError.statusArray
+		var status = FirebirdVectorError.vector
 		
 		if isc_dsql_prepare(&status, &transaction.handle, &statement.handle, 0, statement.query, statement.dialect, nil) > 0 {
-			throw FirebirdError(from: status)
+			throw FirebirdVectorError(from: status)
 		}
 		
 		self.logger.trace("Statement \(statement) prepared")
