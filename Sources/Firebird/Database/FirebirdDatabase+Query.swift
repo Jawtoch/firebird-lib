@@ -95,7 +95,7 @@ public extension FirebirdDatabase {
                         nullable: variable.nullable)
                     
 					let bind = binds[index]
-                    let bindValue = bind.data(accordingTo: context)
+                    let bindValue = bind.data(in: context)
 					variable.data = bindValue
 					
 					if variable.nullable {

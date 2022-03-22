@@ -31,7 +31,7 @@ public class FirebirdStoragePool {
 				variable.dataPointer = self.allocateMemory(for: CChar.self, capacity: variable.size, as: ISC_SCHAR.self)
 			case .varying:
 				variable.dataPointer = self.allocateMemory(for: CChar.self, capacity: variable.size + 2, as: ISC_SCHAR.self)
-				variable.type = .text
+				//variable.type = .text
 			case .long, .d_float, .float:
 				variable.dataPointer = self.allocateMemory(for: CLong.self, as: ISC_SCHAR.self)
 			case .short:
