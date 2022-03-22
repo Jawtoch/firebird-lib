@@ -112,10 +112,15 @@ final class FirebirdTests: XCTestCase {
 	}
     
     func testQuery() throws {
-        try self.connection.query("SELECT emp_firstname FROM employee") { row in
+        try self.connection.query("SELECT phone_ext FROM employee WHERE emp_no = 2") { row in
             for (column, dataConvertible) in row.values {
-                let firstName = String(dataConvertible.data!, using: dataConvertible.context) ?? "<empty>"
-                print(row.index, column, firstName.replacingOccurrences(of: " ", with: "."))
+				let value: String
+				if let data = dataConvertible.data {
+					value = String(data, using: dataConvertible.context) ?? "<null>"
+				} else {
+					value = "<null>"
+				}
+                print(row.index, column, value)
             }
         }
     }

@@ -7,14 +7,14 @@
 
 import fbclient
 
-protocol FirebirdError: Error, CustomStringConvertible {
+public protocol FirebirdError: Error, CustomStringConvertible {
 	
 	var reason: String { get }
 		
 }
 
 extension FirebirdError {
-	var description: String {
+	public var description: String {
 		self.reason
 	}
 }

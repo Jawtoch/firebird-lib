@@ -11,5 +11,5 @@ public struct FirebirdRow {
 	
 	public let index: Int
 	
-    public let values: [String: (context: DataConvertionContext, data: Data?)]
+    public let values: [String: (context: FirebirdDataConvertionContext, data: Data?)]
 }

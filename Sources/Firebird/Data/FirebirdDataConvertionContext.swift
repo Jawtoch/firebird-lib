@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct DataConvertionContext {
+public struct FirebirdDataConvertionContext {
     
     public let dataType: FirebirdDataType
     

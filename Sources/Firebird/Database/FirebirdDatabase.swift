@@ -16,14 +16,14 @@ public protocol FirebirdDatabase {
 	/// - Parameters:
 	///   - query: a query string
 	///   - binds: query parameters
-	func simpleQuery(_ query: String, _ binds: [FirebirdData]) throws
+	func simpleQuery(_ query: String, _ binds: [FirebirdDataConvertible]) throws
 
 	/// Perform a query that return datas
 	/// - Parameters:
 	///   - query: a query string
 	///   - binds: query parameters
 	/// - Returns: the result rows
-	func query(_ query: String, _ binds: [DataConvertible]) throws -> [FirebirdRow]
+	func query(_ query: String, _ binds: [FirebirdDataConvertible]) throws -> [FirebirdRow]
 	
 	func withTransaction<T>(_ closure: @escaping(() throws -> T)) throws -> T
 }

@@ -6,6 +6,7 @@
 //
 
 import fbclient
+import Foundation
 
 struct FirebirdSQLVariable {
 	
