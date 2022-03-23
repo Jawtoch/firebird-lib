@@ -12,9 +12,3 @@ protocol FirebirdError: Error, CustomStringConvertible {
 	var reason: String { get }
 		
 }
-
-extension FirebirdError {
-	var description: String {
-		self.reason
-	}
-}

@@ -8,6 +8,7 @@
 import XCTest
 @testable import FirebirdSQL
 import fbclient
+import Logging
 
 class FirebirdSQLTests: XCTestCase {
 
@@ -109,5 +110,25 @@ class FirebirdSQLTests: XCTestCase {
 		
 		try transaction.start(on: database)
 		XCTAssertGreaterThan(transaction.handle, 0)
+	}
+	
+	func testConnection() async throws {
+		var logger = Logger(label: "test.firebirdsql")
+		logger.logLevel = .debug
+		var parameters = ConnectionParameterBuffer()
+		
+		parameters.add(parameter: Version1FirebirdDatabaseOption())
+		parameters.add(parameter: DialectFirebirdDatabaseOption(.v6))
+		parameters.add(parameter: UsernameFirebirdDatabaseOption("SYSDBA"))
+		parameters.add(parameter: PasswordFirebirdDatabaseOption("SMETHING"))
+		
+		do {
+			let connection = try await Connection.connect(to: "saturn.local", database: "employee", parameters: parameters, logger: logger)
+			XCTAssertFalse(connection.isClosed)
+		} catch let error as FirebirdError {
+			print(error.description)
+			throw error
+		}
+		
 	}
 }

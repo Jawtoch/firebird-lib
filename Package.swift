@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "firebird-lib",
+	platforms: [.macOS(.v10_15)],
     products: [
         .library(
             name: "Firebird",

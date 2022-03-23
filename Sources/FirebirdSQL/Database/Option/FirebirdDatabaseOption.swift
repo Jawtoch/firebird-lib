@@ -7,10 +7,18 @@
 
 import fbclient
 
-protocol FirebirdDatabaseOption: DatabaseOption {
+protocol FirebirdDatabaseOption: DatabaseOption, ConnectionParameter {
 	
 	typealias Element = ISC_SCHAR
 	
 	var buffer: [Element] { get }
+	
+}
+
+extension FirebirdDatabaseOption {
+	
+	var rawBytes: [ISC_SCHAR] {
+		self.buffer
+	}
 	
 }

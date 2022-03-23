@@ -7,8 +7,6 @@
 
 import Foundation
 
-protocol Statement: AnyObject {
-    
-    associatedtype Database: FirebirdSQL.Database
+public protocol Statement {
 
 }

@@ -5,22 +5,21 @@
 //  Created by ugo cottin on 09/03/2022.
 //
 
-protocol Database {
-    
-    associatedtype Statement: FirebirdSQL.Statement
-    
-    associatedtype Transaction: FirebirdSQL.Transaction
+import Logging
+
+public protocol Database {
 	
-	var isAttached: Bool { get }
+	var logger: Logger { get }
 	
-	func attach(_ database: String) throws
+	func execute(_ statement: Statement, logger: Logger) async -> Void
 	
-	func detach() throws
+	func withConnection<T>(_ closure: @escaping () async -> T) async -> T
+}
+
+extension Database {
 	
-	func create(_ database: String) throws
+	public func logging(to logger: Logger) -> Database {
+		DatabaseWithCustomLogger(database: self, logger: logger)
+	}
 	
-	func drop() throws
-	
-    // MARK: Transaction
-    func startTransaction() throws -> Transaction
 }

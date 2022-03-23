@@ -7,8 +7,12 @@
 //
 
 struct FirebirdCustomError: FirebirdError {
-	
+		
 	let reason: String
+	
+	var description: String {
+		self.reason
+	}
 	
 	init(reason: String) {
 		self.reason = reason
