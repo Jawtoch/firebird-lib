@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  TransactionExistenceBlock.swift
 //  
 //
 //  Created by ugo cottin on 08/03/2022.

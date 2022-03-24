@@ -18,3 +18,11 @@ struct Version3FirebirdTransactionOption: FirebirdTransactionOption {
 	}
 	
 }
+
+extension Version3FirebirdTransactionOption: TransactionParameter {
+	
+	var rawBytes: [ISC_SCHAR] {
+		self.buffer
+	}
+	
+}

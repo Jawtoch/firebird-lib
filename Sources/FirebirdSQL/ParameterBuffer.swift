@@ -45,3 +45,20 @@ public struct ConnectionParameterBuffer: ParameterBuffer {
 	}
 	
 }
+
+public protocol TransactionParameter {
+	
+	var rawBytes: [ISC_SCHAR] { get }
+	
+}
+
+public struct TransactionParameterBuffer: ParameterBuffer {
+	
+	public typealias Parameter = TransactionParameter
+	
+	public var parameters: [TransactionParameter] = []
+	
+	public mutating func add(parameter: TransactionParameter) {
+		self.parameters.append(parameter)
+	}
+}

@@ -7,6 +7,8 @@
 
 import fbclient
 
+// TODO: transform it into a protocol which define the method 'makeAllocation(for variable: SQLVariable, on allocationPool: AllocationPoolSource)'. This will make the type extensible
+
 struct FirebirdDataType: RawRepresentable, Equatable {
 	
 	typealias RawValue = Int32

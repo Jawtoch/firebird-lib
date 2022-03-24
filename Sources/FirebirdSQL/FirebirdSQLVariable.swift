@@ -8,11 +8,15 @@
 import fbclient
 import Foundation
 
-struct FirebirdSQLVariable {
+public class FirebirdSQLVariable {
 	
 	typealias ReferenceType = XSQLVAR
 		
 	let handle: UnsafeMutablePointer<ReferenceType>
+	
+	init(handle: UnsafeMutablePointer<ReferenceType>) {
+		self.handle = handle
+	}
 	
 	private var pointee: ReferenceType {
 		self.handle.pointee
@@ -51,6 +55,40 @@ struct FirebirdSQLVariable {
 	}
 		
 	var data: Data? {
-		nil
+		Data(bytes: self.handle.pointee.sqldata, count: Int(self.maximumSize))
+	}
+	
+	var name: String {
+		String(cString: &self.handle.pointee.sqlname.0)
+	}
+	
+	var relation: String {
+		String(cString: &self.handle.pointee.relname.0)
+	}
+	
+	var owner: String {
+		String(cString: &self.handle.pointee.ownname.0)
+	}
+	
+	var alias: String {
+		String(cString: &self.handle.pointee.aliasname.0)
+	}
+		
+	var unsafeDataStorage: UnsafeMutablePointer<ISC_SCHAR>? {
+		get {
+			self.handle.pointee.sqldata
+		}
+		set {
+			self.handle.pointee.sqldata = newValue
+		}
+	}
+	
+	var unsafeNilStorage: UnsafeMutablePointer<ISC_SHORT>? {
+		get {
+			self.handle.pointee.sqlind
+		}
+		set {
+			self.handle.pointee.sqlind = newValue
+		}
 	}
 }
