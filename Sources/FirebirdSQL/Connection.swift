@@ -10,11 +10,11 @@ import fbclient
 
 public class Connection {
 	
-	let logger: Logger
+	public let logger: Logger
 	
 	let handle: isc_db_handle
 	
-	var isClosed: Bool {
+	public var isClosed: Bool {
 		self.handle <= 0
 	}
 	
