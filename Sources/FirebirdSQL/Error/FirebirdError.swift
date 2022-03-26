@@ -7,7 +7,7 @@
 
 import fbclient
 
-protocol FirebirdError: Error, CustomStringConvertible {
+public protocol FirebirdError: Error, CustomStringConvertible {
 	
 	var reason: String { get }
 		

@@ -12,6 +12,7 @@ public protocol ParameterBuffer: Sequence {
 	var parameters: [Parameter] { get }
 	
 	mutating func add(parameter: Parameter)
+	
 }
 
 public extension ParameterBuffer {
@@ -25,40 +26,4 @@ public extension ParameterBuffer {
 		}
 	}
 	
-}
-
-import fbclient
-public protocol ConnectionParameter {
-	
-	var rawBytes: [ISC_SCHAR] { get }
-	
-}
-
-public struct ConnectionParameterBuffer: ParameterBuffer {
-	
-	public typealias Parameter = ConnectionParameter
-	
-	public var parameters: [ConnectionParameter] = []
-	
-	public mutating func add(parameter: ConnectionParameter) {
-		self.parameters.append(parameter)
-	}
-	
-}
-
-public protocol TransactionParameter {
-	
-	var rawBytes: [ISC_SCHAR] { get }
-	
-}
-
-public struct TransactionParameterBuffer: ParameterBuffer {
-	
-	public typealias Parameter = TransactionParameter
-	
-	public var parameters: [TransactionParameter] = []
-	
-	public mutating func add(parameter: TransactionParameter) {
-		self.parameters.append(parameter)
-	}
 }

@@ -7,23 +7,23 @@
 
 import fbclient
 
-struct FirebirdVectorError {
+public struct FirebirdVectorError {
 	
-	static var vector: [ISC_STATUS] {
+	public static var vector: [ISC_STATUS] {
 		Array(repeating: .zero, count: Int(ISC_STATUS_LENGTH))
 	}
 	
-	let sqlCode: Int32
+	public let sqlCode: Int32
 	
-	let sqlMessage: String
+	public let sqlMessage: String
 	
-	let message: String
+	public let message: String
 	
-	let detais: [String]
+	public let detais: [String]
 	
-	let vector: [ISC_STATUS]
+	public let vector: [ISC_STATUS]
 	
-	init(from vector: [ISC_STATUS]) {
+	public init(from vector: [ISC_STATUS]) {
 		self.vector = vector
 		var vector = vector
 		let sqlCode = isc_sqlcode(&vector)
@@ -58,11 +58,11 @@ struct FirebirdVectorError {
 
 extension FirebirdVectorError: FirebirdError {
 	
-	var reason: String {
+	public var reason: String {
 		self.message
 	}
 	
-	var description: String {
+	public var description: String {
 		"""
 		Error \(self.sqlCode): \(self.sqlMessage)
 		Reason: \(self.reason)

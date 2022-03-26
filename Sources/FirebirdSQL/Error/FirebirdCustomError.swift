@@ -6,15 +6,15 @@
 //  Created by ugo cottin on 15/03/2022.
 //
 
-struct FirebirdCustomError: FirebirdError {
+public struct FirebirdCustomError: FirebirdError {
 		
-	let reason: String
+	public let reason: String
 	
-	var description: String {
+	public var description: String {
 		self.reason
 	}
 	
-	init(reason: String) {
+	public init(reason: String) {
 		self.reason = reason
 	}
 	
