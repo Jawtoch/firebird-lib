@@ -7,9 +7,9 @@
 
 import Foundation
 
-class FirebirdDecoder {
+public class FirebirdDecoder {
 	
-	func decode<T>(_ type: T.Type, from data: Data?, context: CodingContext) throws -> T where T: Decodable {
+	public func decode<T>(_ type: T.Type, from data: Data?, context: FirebirdCodingContext) throws -> T where T: Decodable {
 		let decoder = _FirebirdDecoder(context: context, data: data)
 		let value = try T.init(from: decoder)
 		
@@ -18,21 +18,21 @@ class FirebirdDecoder {
 	
 }
 
-class _FirebirdDecoder: Decoder, DecodingContainer {
+internal class _FirebirdDecoder: Decoder {
 
 	var codingPath: [CodingKey]
 	
 	var userInfo: [CodingUserInfoKey : Any]
 	
-	var context: CodingContext
+	var context: FirebirdCodingContext
 	
-	var data: Data?
+	var storage: Data?
 	
-	init(codingPath: [CodingKey] = [], userInfo: [CodingUserInfoKey : Any] = [:], context: CodingContext, data: Data?) {
+	init(codingPath: [CodingKey] = [], userInfo: [CodingUserInfoKey : Any] = [:], context: FirebirdCodingContext, data: Data?) {
 		self.codingPath = codingPath
 		self.userInfo = userInfo
 		self.context = context
-		self.data = data
+		self.storage = data
 	}
 	
 	func container<Key>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> where Key : CodingKey {
@@ -44,9 +44,17 @@ class _FirebirdDecoder: Decoder, DecodingContainer {
 	}
 	
 	func singleValueContainer() throws -> Swift.SingleValueDecodingContainer {
-		let container = _SingleValueDecodingContainer(codingPath: self.codingPath, context: self.context, data: self.data)
+		let container = FirebirdSingleValueDecodingContainer(codingPath: self.codingPath, context: self.context, data: self.storage)
 		
 		return container
+	}
+	
+}
+
+extension _FirebirdDecoder: FirebirdDecodingContainer {
+	
+	var data: Data? {
+		self.storage
 	}
 	
 }

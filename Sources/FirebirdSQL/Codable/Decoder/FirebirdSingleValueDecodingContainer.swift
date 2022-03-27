@@ -1,5 +1,5 @@
 //
-//  SingleValueDecodingContainer.swift
+//  FirebirdSingleValueDecodingContainer.swift
 //  
 //
 //  Created by ugo cottin on 26/03/2022.
@@ -7,23 +7,31 @@
 
 import Foundation
 
-class _SingleValueDecodingContainer: DecodingContainer {
+internal class FirebirdSingleValueDecodingContainer {
 	
 	var codingPath: [CodingKey]
 	
-	var context: CodingContext
+	var context: FirebirdCodingContext
 	
-	var data: Data?
+	var storage: Data?
 	
-	init(codingPath: [CodingKey], context: CodingContext, data: Data?) {
+	init(codingPath: [CodingKey], context: FirebirdCodingContext, data: Data?) {
 		self.codingPath = codingPath
 		self.context = context
-		self.data = data
+		self.storage = data
 	}
 	
 }
 
-extension _SingleValueDecodingContainer: SingleValueDecodingContainer {
+extension FirebirdSingleValueDecodingContainer: FirebirdDecodingContainer {
+	
+	var data: Data? {
+		self.storage
+	}
+	
+}
+
+extension FirebirdSingleValueDecodingContainer: SingleValueDecodingContainer {
 	
 	func decodeNil() -> Bool {
 		fatalError("Non implemented")
@@ -34,7 +42,7 @@ extension _SingleValueDecodingContainer: SingleValueDecodingContainer {
 	}
 	
 	func decode(_ type: String.Type) throws -> String {
-		guard let data = self.data else {
+		guard let data = self.storage else {
 			let context = DecodingError.Context(
 				codingPath: self.codingPath,
 				debugDescription: "Unable to decode non optional String from nil data")
@@ -91,7 +99,7 @@ extension _SingleValueDecodingContainer: SingleValueDecodingContainer {
 			throw DecodingError.typeMismatch(type, context)
 		}
 		
-		guard let data = self.data else {
+		guard let data = self.storage else {
 			let context = DecodingError.Context(
 				codingPath: self.codingPath,
 				debugDescription: "Unable to decode non optional Int16 from nil data")

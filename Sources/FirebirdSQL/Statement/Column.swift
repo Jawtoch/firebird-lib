@@ -11,7 +11,7 @@ public struct Column {
 	
 	public let name: String
 	
-	public let context: CodingContext
+	public let context: FirebirdCodingContext
 	
 	public let data: Data?
 	

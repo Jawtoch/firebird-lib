@@ -91,7 +91,7 @@ public class Statement {
 				
 				var columns: [Column] = []
 				for variable in outputDescriptorArea {
-					let context = CodingContext(
+					let context = FirebirdCodingContext(
 						dataType: variable.type,
 						scale: variable.scale,
 						size: variable.maximumSize)

@@ -1,5 +1,5 @@
 //
-//  SingleValueEncodingContainer.swift
+//  FirebirdSingleValueEncodingContainer.swift
 //  
 //
 //  Created by ugo cottin on 26/03/2022.
@@ -7,17 +7,17 @@
 
 import Foundation
 
-class SingleValueContainer {
+class FirebirdSingleValueEncodingContainer {
 		
 	var codingPath: [CodingKey]
 	
-	var context: CodingContext
+	var context: FirebirdCodingContext
 	
 	var storage: Data?
 	
 	private var canEncodeNewValue: Bool
 	
-	init(codingPath: [CodingKey], context: CodingContext) {
+	init(codingPath: [CodingKey], context: FirebirdCodingContext) {
 		self.codingPath = codingPath
 		self.context = context
 		self.storage = nil
@@ -35,7 +35,7 @@ class SingleValueContainer {
 	
 }
 
-extension SingleValueContainer: EncodingContainer {
+extension FirebirdSingleValueEncodingContainer: FirebirdEncodingContainer {
 	
 	var data: Data? {
 		self.storage
@@ -43,7 +43,7 @@ extension SingleValueContainer: EncodingContainer {
 	
 }
 
-extension SingleValueContainer: SingleValueEncodingContainer {
+extension FirebirdSingleValueEncodingContainer: SingleValueEncodingContainer {
 	func encodeNil() throws {
 		try self.canEncode(value: nil)
 		

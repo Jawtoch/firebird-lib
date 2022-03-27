@@ -7,9 +7,9 @@
 
 import Foundation
 
-class FirebirdEncoder {
+public class FirebirdEncoder {
 	
-	func encode<T>(_ value: T, context: CodingContext) throws -> Data? where T: Encodable {
+	public func encode<T>(_ value: T, context: FirebirdCodingContext) throws -> Data? where T: Encodable {
 		let encoder = _FirebirdEncoder(context: context)
 		try value.encode(to: encoder)
 		
@@ -18,21 +18,21 @@ class FirebirdEncoder {
 	
 }
 
-class _FirebirdEncoder: Encoder {
+internal class _FirebirdEncoder: Encoder {
 	
 	var codingPath: [CodingKey]
 	
 	var userInfo: [CodingUserInfoKey : Any]
 	
-	var context: CodingContext
+	var context: FirebirdCodingContext
 	
-	var container: EncodingContainer? {
+	var container: FirebirdEncodingContainer? {
 		willSet {
 			precondition(self.container == nil)
 		}
 	}
 	
-	init(codingPath: [CodingKey] = [], userInfo: [CodingUserInfoKey : Any] = [:], context: CodingContext) {
+	init(codingPath: [CodingKey] = [], userInfo: [CodingUserInfoKey : Any] = [:], context: FirebirdCodingContext) {
 		self.codingPath = codingPath
 		self.userInfo = userInfo
 		self.context = context
@@ -47,14 +47,14 @@ class _FirebirdEncoder: Encoder {
 	}
 	
 	func singleValueContainer() -> SingleValueEncodingContainer {
-		let container = SingleValueContainer(codingPath: self.codingPath, context: self.context)
+		let container = FirebirdSingleValueEncodingContainer(codingPath: self.codingPath, context: self.context)
 		self.container = container
 		
 		return container
 	}
 }
 
-extension _FirebirdEncoder: EncodingContainer {
+extension _FirebirdEncoder: FirebirdEncodingContainer {
 	
 	var data: Data? {
 		self.container?.data

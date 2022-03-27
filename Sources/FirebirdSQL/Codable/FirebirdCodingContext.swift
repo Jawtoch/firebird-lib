@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct CodingContext {
+public struct FirebirdCodingContext {
 	
 	public let dataType: FirebirdDataType
 	
