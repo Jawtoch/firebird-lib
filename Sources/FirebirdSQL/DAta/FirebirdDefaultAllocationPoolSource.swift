@@ -1,37 +1,26 @@
 //
-//  File.swift
+//  FirebirdDefaultAllocationPoolSource.swift
 //  
 //
-//  Created by Ugo Cottin on 24/03/2022.
+//  Created by ugo cottin on 26/03/2022.
 //
 
+import fbclient
 import Logging
 
-public protocol AllocationPoolSource {
+public class FirebirdDefaultAllocationPoolSource: FirebirdAllocationPoolSource {
 	
-	var isReleased: Bool { get }
-	
-	func makeAllocation(for variable: FirebirdSQLVariable, logger: Logger)
-	
-	func release(logger: Logger)
-	
-}
-
-import fbclient
-
-class FirebirdAllocationPoolSource: AllocationPoolSource {
-	
-	var isReleased: Bool {
+	public var isReleased: Bool {
 		!self.allocation.isEmpty
 	}
 	
-	private var allocation: [UnsafeRawPointer]
+	var allocation: [UnsafeRawPointer]
 	
-	init() {
+	public init() {
 		self.allocation = []
 	}
 	
-	func makeAllocation(for variable: FirebirdSQLVariable, logger: Logger) {
+	public func makeAllocation(for variable: FirebirdSQLVariable, logger: Logger) {
 		logger.debug("Allocating memory for variable \(variable)")
 		if variable.type.isNullable {
 			variable.unsafeNilStorage = self.allocate(CShort.self, capacity: 1, logger: logger)
@@ -64,7 +53,7 @@ class FirebirdAllocationPoolSource: AllocationPoolSource {
 		return rawPointer.assumingMemoryBound(to: R.self)
 	}
 	
-	func release(logger: Logger) {
+	public func release(logger: Logger) {
 		let count = self.allocation.count
 		self.allocation.forEach { $0.deallocate() }
 		self.allocation.removeAll()
@@ -72,3 +61,4 @@ class FirebirdAllocationPoolSource: AllocationPoolSource {
 	}
 	
 }
+

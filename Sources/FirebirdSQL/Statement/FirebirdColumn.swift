@@ -1,5 +1,5 @@
 //
-//  Column.swift
+//  FirebirdColumn.swift
 //  
 //
 //  Created by ugo cottin on 26/03/2022.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Column {
+public struct FirebirdColumn {
 	
 	public let name: String
 	

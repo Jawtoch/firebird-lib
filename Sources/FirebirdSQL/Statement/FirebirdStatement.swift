@@ -1,5 +1,5 @@
 //
-//  Statement.swift
+//  FirebirdStatement.swift
 //  
 //
 //  Created by ugo cottin on 03/03/2022.
@@ -8,7 +8,7 @@
 import fbclient
 import Logging
 
-public class Statement {
+public class FirebirdStatement {
 
 	public var handle: isc_stmt_handle
 	
@@ -20,18 +20,18 @@ public class Statement {
 	
 	private var outputDescriptorArea: FirebirdDescriptorArea?
 	
-	private let allocationPool: AllocationPoolSource
+	private let allocationPool: FirebirdAllocationPoolSource
 	
-	public init(handle: isc_stmt_handle, database: Database, query: String, dialect: UInt16) {
+	public init(handle: isc_stmt_handle, database: FirebirdDatabase, query: String, dialect: UInt16) {
 		self.handle = handle
 		self.query = query
 		self.dialect = dialect
 		self.inputDescriptorArea = nil
 		self.outputDescriptorArea = nil
-		self.allocationPool = FirebirdAllocationPoolSource()
+		self.allocationPool = FirebirdDefaultAllocationPoolSource()
 	}
 	
-	public func prepare(transaction: Transaction, logger: Logger) throws {
+	public func prepare(transaction: FirebirdTransaction, logger: Logger) throws {
 		try self.query.withCString { queryStringPointer in
 			guard let queryLength = UInt16(exactly: query.count) else {
 				throw FirebirdCustomError(reason: "Wrong query string size")
@@ -63,7 +63,7 @@ public class Statement {
 		self.outputDescriptorArea = try self.describeOutput(logger: logger)
 	}
 	
-	public func execute(transaction: Transaction, cursorName: String, logger: Logger) throws -> QueryResult {
+	public func execute(transaction: FirebirdTransaction, cursorName: String, logger: Logger) throws -> FirebirdQueryResult {
 		logger.debug("Executing statement \(self)")
 		
 		guard let outputDescriptorArea = outputDescriptorArea else {
@@ -81,7 +81,7 @@ public class Statement {
 			isc_dsql_set_cursor_name(&status, &self.handle, cursorName, 0)
 		}
 		
-		var rows: [Row] = []
+		var rows: [FirebirdRow] = []
 		
 		try withStatus { status in
 			let fetchStatus: ISC_STATUS = 0
@@ -89,17 +89,17 @@ public class Statement {
 			var index = 0
 			while case fetchStatus = isc_dsql_fetch(&status, &self.handle, 1, outputDescriptorArea.handle), fetchStatus == 0 {
 				
-				var columns: [Column] = []
+				var columns: [FirebirdColumn] = []
 				for variable in outputDescriptorArea {
 					let context = FirebirdCodingContext(
 						dataType: variable.type,
 						scale: variable.scale,
 						size: variable.maximumSize)
-					let column = Column(name: variable.name, context: context, data: variable.data)
+					let column = FirebirdColumn(name: variable.name, context: context, data: variable.data)
 					columns.append(column)
 				}
 				
-				let row = Row(index: index, columns: columns)
+				let row = FirebirdRow(index: index, columns: columns)
 				rows.append(row)
 				index += 1
 			}
@@ -109,10 +109,10 @@ public class Statement {
 		
 		logger.debug("\(rows.count) rows fetched for statement \(self)")
 		
-		return QueryResult(rows: rows)
+		return FirebirdQueryResult(rows: rows)
 	}
 	
-	public func free(_ option: StatementFreeOption = .close, logger: Logger) throws {
+	public func free(_ option: FirebirdStatementFreeOption = .close, logger: Logger) throws {
 		logger.debug("Freeing statement \(self) with option \(option)")
 		try withStatus { status in
 			isc_dsql_free_statement(&status, &self.handle, option.rawValue)
@@ -166,7 +166,7 @@ public class Statement {
 	}
 }
 
-extension Statement: CustomStringConvertible {
+extension FirebirdStatement: CustomStringConvertible {
 	
 	public var description: String {
 		"\(self.handle)"

@@ -25,12 +25,14 @@ class FirebirdSQLTests: XCTestCase {
 			let connection = try await FirebirdConnection.connect(to: "127.0.0.1", database: "employee", parameters: connectionParameters, logger: logger)
 			XCTAssertFalse(connection.isClosed)
 			
-			try connection.requestInformations([ODSVersionDatabaseInformation(), ODSMinorVersionDatabaseInformation()], logger: logger)
+			try connection.requestInformations([
+				FirebirdODSVersionDatabaseInformation(),
+				FirebirdODSMinorVersionDatabaseInformation()], logger: logger)
 			
 			let statement = connection.createStatement("SELECT PHONE_EXT FROM employee")
 			
-			var transactionParameters = TransactionParameterBuffer()
-			transactionParameters.add(parameter: Version3TransactionParameter())
+			var transactionParameters = FirebirdTransactionParameterBuffer()
+			transactionParameters.add(parameter: FirebirdVersion3TransactionParameter())
 			let transaction = try connection.startTransaction(parameters: transactionParameters)
 			
 			let results = try connection.execute(statement, transaction: transaction, logger: logger)

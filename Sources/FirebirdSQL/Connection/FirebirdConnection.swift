@@ -49,7 +49,7 @@ public class FirebirdConnection {
 		self.handle = handle
 	}
 	
-	func requestInformations(_ informations: [DatabaseInformation], logger: Logger) throws {
+	func requestInformations(_ informations: [FirebirdDatabaseInformation], logger: Logger) throws {
 		logger.debug("Requesting \(informations.count) information(s) for connection \(self)")
 		
 		let requestBuffer = informations.map { $0.rawValue }
@@ -68,7 +68,7 @@ public class FirebirdConnection {
 			}
 		}
 		
-		var requestedInformations: [DatabaseInformation.RawValue: ISC_LONG] = [:]
+		var requestedInformations: [FirebirdDatabaseInformation.RawValue: ISC_LONG] = [:]
 		resultBuffer.withUnsafeMutableBufferPointer { resultBufferPointer in
 			
 			guard let bufferAddress = resultBufferPointer.baseAddress else {
@@ -95,18 +95,18 @@ public class FirebirdConnection {
 	}
 }
 
-extension FirebirdConnection: Database {
+extension FirebirdConnection: FirebirdDatabase {
 	
-	public func createStatement(_ query: String) -> Statement {
+	public func createStatement(_ query: String) -> FirebirdStatement {
 		var status = FirebirdVectorError.vector
 		var statementHandle: isc_stmt_handle = .zero
 		
 		isc_dsql_allocate_statement(&status, &self.handle, &statementHandle)
 		
-		return Statement(handle: statementHandle, database: self, query: query, dialect: UInt16(SQL_DIALECT_V6))
+		return FirebirdStatement(handle: statementHandle, database: self, query: query, dialect: UInt16(SQL_DIALECT_V6))
 	}
 		
-	public func execute(_ statement: Statement, transaction: Transaction, logger: Logger) throws -> QueryResult {
+	public func execute(_ statement: FirebirdStatement, transaction: FirebirdTransaction, logger: Logger) throws -> FirebirdQueryResult {
 		try statement.prepare(transaction: transaction, logger: logger)
 		try statement.describe(logger: logger)
 		let result = try statement.execute(transaction: transaction, cursorName: "dyn_cursor", logger: logger)
@@ -119,7 +119,7 @@ extension FirebirdConnection: Database {
 		try closure(self)
 	}
 	
-	public func startTransaction(parameters: TransactionParameterBuffer) throws -> Transaction {
+	public func startTransaction(parameters: FirebirdTransactionParameterBuffer) throws -> FirebirdTransaction {
 		var status = FirebirdVectorError.vector
 		var transactionHandle: isc_tr_handle = .zero
 		
@@ -131,7 +131,7 @@ extension FirebirdConnection: Database {
 					throw FirebirdCustomError(reason: "Buffer too large")
 				}
 				
-				let block = TransactionExistenceBlock(
+				let block = FirebirdTransactionExistenceBlock(
 					database: databaseHandle,
 					count: bufferLength,
 					parameters: bufferPointer)
@@ -153,7 +153,7 @@ extension FirebirdConnection: Database {
 			}
 		}
 		
-		return Transaction(handle: transactionHandle)
+		return FirebirdTransaction(handle: transactionHandle)
 	}
 }
 
