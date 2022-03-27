@@ -1,5 +1,5 @@
 //
-//  UsernameConnectionParameter.swift
+//  FirebirdUsernameConnectionParameter.swift
 //  
 //
 //  Created by ugo cottin on 09/03/2022.
@@ -7,7 +7,7 @@
 
 import fbclient
 
-struct UsernameConnectionParameter: ConnectionParameter {
+struct FirebirdUsernameConnectionParameter: FirebirdConnectionParameter {
 	
 	public let username: String
 	

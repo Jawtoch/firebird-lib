@@ -15,7 +15,7 @@ public protocol Database {
 	
 	func execute(_ statement: Statement, transaction: Transaction, logger: Logger) throws -> QueryResult
 	
-	func withConnection<T>(_ closure: (Connection) throws -> T) rethrows -> T
+	func withConnection<T>(_ closure: (FirebirdConnection) throws -> T) rethrows -> T
 	
 	func startTransaction(parameters: TransactionParameterBuffer) throws -> Transaction
 }

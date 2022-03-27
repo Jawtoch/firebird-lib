@@ -21,7 +21,7 @@ extension DatabaseWithCustomLogger: Database {
 		return try self.database.execute(statement, transaction: transaction, logger: logger)
 	}
 	
-	func withConnection<T>(_ closure: (Connection) throws -> T) rethrows -> T {
+	func withConnection<T>(_ closure: (FirebirdConnection) throws -> T) rethrows -> T {
 		try self.database.withConnection(closure)
 	}
 

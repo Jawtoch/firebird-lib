@@ -1,5 +1,5 @@
 //
-//  PasswordConnectionParameter.swift
+//  FirebirdPasswordConnectionParameter.swift
 //
 //
 //  Created by ugo cottin on 09/03/2022.
@@ -7,7 +7,7 @@
 
 import fbclient
 
-public struct PasswordConnectionParameter: ConnectionParameter {
+public struct FirebirdPasswordConnectionParameter: FirebirdConnectionParameter {
 	
 	private let password: String
 	

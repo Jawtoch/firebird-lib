@@ -15,14 +15,14 @@ class FirebirdSQLTests: XCTestCase {
 		do {
 			var logger = Logger(label: "test.firebirdsql")
 			logger.logLevel = .debug
-			var connectionParameters = ConnectionParameterBuffer()
+			var connectionParameters = FirebirdConnectionParameterBuffer()
 			
-			connectionParameters.add(parameter: Version1ConnectionParameter())
-			connectionParameters.add(parameter: DialectConnectionParameter(.v6))
-			connectionParameters.add(parameter: UsernameConnectionParameter("SYSDBA"))
-			connectionParameters.add(parameter: PasswordConnectionParameter("SMETHING"))
+			connectionParameters.add(parameter: FirebirdVersion1ConnectionParameter())
+			connectionParameters.add(parameter: FirebirdDialectConnectionParameter(.v6))
+			connectionParameters.add(parameter: FirebirdUsernameConnectionParameter("SYSDBA"))
+			connectionParameters.add(parameter: FirebirdPasswordConnectionParameter("SMETHING"))
 			
-			let connection = try await Connection.connect(to: "127.0.0.1", database: "employee", parameters: connectionParameters, logger: logger)
+			let connection = try await FirebirdConnection.connect(to: "127.0.0.1", database: "employee", parameters: connectionParameters, logger: logger)
 			XCTAssertFalse(connection.isClosed)
 			
 			try connection.requestInformations([ODSVersionDatabaseInformation(), ODSMinorVersionDatabaseInformation()], logger: logger)

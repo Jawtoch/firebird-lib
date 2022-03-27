@@ -1,5 +1,5 @@
 //
-//  DialectConnectionParameter.swift
+//  FirebirdDialectConnectionParameter.swift
 //
 //
 //  Created by ugo cottin on 09/03/2022.
@@ -7,7 +7,7 @@
 
 import fbclient
 
-public struct DialectConnectionParameter: ConnectionParameter {
+public struct FirebirdDialectConnectionParameter: FirebirdConnectionParameter {
 	
 	public enum Dialect: Int {
 		case compatible = 1

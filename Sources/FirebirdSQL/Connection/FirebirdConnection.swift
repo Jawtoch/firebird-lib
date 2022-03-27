@@ -1,5 +1,5 @@
 //
-//  Connection.swift
+//  FirebirdConnection.swift
 //  
 //
 //  Created by Ugo Cottin on 23/03/2022.
@@ -8,7 +8,7 @@
 import Logging
 import fbclient
 
-public class Connection {
+public class FirebirdConnection {
 	
 	public let logger: Logger
 	
@@ -18,7 +18,7 @@ public class Connection {
 		self.handle <= 0
 	}
 	
-	public static func connect(to host: String, port: UInt16 = 3050, database: String, parameters: ConnectionParameterBuffer, logger: Logger) async throws -> Connection {
+	public static func connect(to host: String, port: UInt16 = 3050, database: String, parameters: FirebirdConnectionParameterBuffer, logger: Logger) async throws -> FirebirdConnection {
 		let databaseUrl = "\(host)/\(port):\(database)"
 		
 		logger.debug("Opening new connection to \(databaseUrl)")
@@ -41,7 +41,7 @@ public class Connection {
 			}
 		}
 			
-		return Connection(handle: handle, logger: logger)
+		return FirebirdConnection(handle: handle, logger: logger)
 	}
 	
 	init(handle: isc_db_handle, logger: Logger) {
@@ -95,7 +95,7 @@ public class Connection {
 	}
 }
 
-extension Connection: Database {
+extension FirebirdConnection: Database {
 	
 	public func createStatement(_ query: String) -> Statement {
 		var status = FirebirdVectorError.vector
@@ -115,7 +115,7 @@ extension Connection: Database {
 		return result
 	}
 		
-	public func withConnection<T>(_ closure: (Connection) throws -> T) rethrows -> T {
+	public func withConnection<T>(_ closure: (FirebirdConnection) throws -> T) rethrows -> T {
 		try closure(self)
 	}
 	
@@ -157,7 +157,7 @@ extension Connection: Database {
 	}
 }
 
-extension Connection: CustomStringConvertible {
+extension FirebirdConnection: CustomStringConvertible {
 	
 	public var description: String {
 		"\(self.handle)"

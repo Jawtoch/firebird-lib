@@ -1,5 +1,5 @@
 //
-//  Version1ConnectionParameter.swift
+//  FirebirdVersion1ConnectionParameter.swift
 //  
 //
 //  Created by ugo cottin on 09/03/2022.
@@ -7,7 +7,7 @@
 
 import fbclient
 
-public struct Version1ConnectionParameter: ConnectionParameter {
+public struct FirebirdVersion1ConnectionParameter: FirebirdConnectionParameter {
 	public var description: String {
 		"Version1"
 	}
