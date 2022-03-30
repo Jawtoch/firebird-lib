@@ -119,7 +119,12 @@ extension FirebirdConnection: FirebirdDatabase {
 		try closure(self)
 	}
 	
-	public func startTransaction(parameters: FirebirdTransactionParameterBuffer) throws -> FirebirdTransaction {
+	// MARK: - Transaction
+	public var inTransaction: Bool {
+		false
+	}
+	
+	public func startTransaction(parameters: FirebirdTransactionParameterBuffer) throws -> FirebirdDatabase {
 		var status = FirebirdVectorError.vector
 		var transactionHandle: isc_tr_handle = .zero
 		
@@ -153,20 +158,18 @@ extension FirebirdConnection: FirebirdDatabase {
 			}
 		}
 		
-		return FirebirdTransaction(handle: transactionHandle)
+		let transaction = FirebirdTransaction(handle: transactionHandle)
+		return FirebirdDatabaseInTransaction(database: self, transaction: transaction)
 	}
 	
-	public func commitTransaction(_ transaction: FirebirdTransaction) throws {
-		try withStatus { status in
-			isc_commit_transaction(&status, &transaction.handle)
-		}
+	public func commitTransaction() throws -> FirebirdDatabase {
+		throw FirebirdCustomError(reason: "no active transaction")
 	}
 	
-	public func rollbackTransaction(_ transaction: FirebirdTransaction) throws {
-		try withStatus { status in
-			isc_rollback_transaction(&status, &transaction.handle)
-		}
+	public func rollbackTransaction() throws -> FirebirdDatabase {
+		throw FirebirdCustomError(reason: "no active transaction")
 	}
+	
 }
 
 extension FirebirdConnection: CustomStringConvertible {

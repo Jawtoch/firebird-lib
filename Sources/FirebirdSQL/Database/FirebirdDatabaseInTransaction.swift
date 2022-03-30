@@ -1,47 +1,53 @@
 //
-//  FirebirdDatabaseWithCustomLogger.swift
+//  FirebirdDatabaseInTransaction.swift
 //  
 //
-//  Created by Ugo Cottin on 23/03/2022.
+//  Created by ugo cottin on 30/03/2022.
 //
 
 import Logging
 
-internal struct FirebirdDatabaseWithCustomLogger {
+struct FirebirdDatabaseInTransaction {
+	
 	let database: FirebirdDatabase
-	let logger: Logger
+	let transaction: FirebirdTransaction
+	
 }
 
-extension FirebirdDatabaseWithCustomLogger: FirebirdDatabase {
+extension FirebirdDatabaseInTransaction: FirebirdDatabase {
+	var logger: Logger {
+		self.database.logger
+	}
+	
 	func createStatement(_ query: String) -> FirebirdStatement {
 		self.database.createStatement(query)
 	}
 	
 	func execute(_ statement: FirebirdStatement, transaction: FirebirdTransaction, logger: Logger) throws -> FirebirdQueryResult {
-		return try self.database.execute(statement, transaction: transaction, logger: logger)
+		try self.database.execute(statement, transaction: self.transaction, logger: self.logger)
 	}
 	
 	func withConnection<T>(_ closure: (FirebirdConnection) throws -> T) rethrows -> T {
 		try self.database.withConnection(closure)
 	}
 	
-	// MARK: - Transaction
 	var inTransaction: Bool {
-		self.database.inTransaction
+		true
 	}
 	
 	func startTransaction(parameters: FirebirdTransactionParameterBuffer) throws -> FirebirdDatabase {
 		try self.database.startTransaction(parameters: parameters)
-			.logging(to: self.logger)
 	}
 	
 	func commitTransaction() throws -> FirebirdDatabase {
-		try self.database.commitTransaction()
-			.logging(to: self.logger)
+		//self.transaction
+		return self.database
 	}
 	
 	func rollbackTransaction() throws -> FirebirdDatabase {
-		try self.database.rollbackTransaction()
-			.logging(to: self.logger)
+		// rollback
+		return self.database
 	}
+	
+	
 }

@@ -19,4 +19,15 @@ public class FirebirdTransaction {
 		self.handle = handle
 	}
 	
+	public func commit() throws {
+		try withStatus { status in
+			isc_commit_transaction(&status, &self.handle)
+		}
+	}
+	
+	public func rollback() throws {
+		try withStatus { status in
+			isc_rollback_transaction(&status, &self.handle)
+		}
+	}
 }

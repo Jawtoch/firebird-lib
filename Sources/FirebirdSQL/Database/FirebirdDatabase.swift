@@ -17,11 +17,15 @@ public protocol FirebirdDatabase {
 	
 	func withConnection<T>(_ closure: (FirebirdConnection) throws -> T) rethrows -> T
 	
-	func startTransaction(parameters: FirebirdTransactionParameterBuffer) throws -> FirebirdTransaction
+	// MARK: - Transaction
+	var inTransaction: Bool { get }
 	
-	func commitTransaction(_ transaction: FirebirdTransaction) throws
+	func startTransaction(parameters: FirebirdTransactionParameterBuffer) throws -> FirebirdDatabase
 	
-	func rollbackTransaction(_ transaction: FirebirdTransaction) throws
+	func commitTransaction() throws -> FirebirdDatabase
+	
+	func rollbackTransaction() throws -> FirebirdDatabase
+	
 }
 
 extension FirebirdDatabase {
