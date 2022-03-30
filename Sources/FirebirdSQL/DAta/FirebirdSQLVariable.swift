@@ -53,9 +53,13 @@ public class FirebirdSQLVariable {
 	public var maximumSize: Int16 {
 		self.pointee.sqllen
 	}
+	
+	public var size: Int16 {
+		self.maximumSize + (self.type == .varying ? 2 : 0)
+	}
 		
 	public var data: Data? {
-		Data(bytes: self.handle.pointee.sqldata, count: Int(self.maximumSize))
+		Data(bytes: self.handle.pointee.sqldata, count: Int(self.size))
 	}
 	
 	public var name: String {

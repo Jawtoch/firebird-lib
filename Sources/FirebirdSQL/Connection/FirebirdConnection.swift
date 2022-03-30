@@ -155,6 +155,18 @@ extension FirebirdConnection: FirebirdDatabase {
 		
 		return FirebirdTransaction(handle: transactionHandle)
 	}
+	
+	public func commitTransaction(_ transaction: FirebirdTransaction) throws {
+		try withStatus { status in
+			isc_commit_transaction(&status, &transaction.handle)
+		}
+	}
+	
+	public func rollbackTransaction(_ transaction: FirebirdTransaction) throws {
+		try withStatus { status in
+			isc_rollback_transaction(&status, &transaction.handle)
+		}
+	}
 }
 
 extension FirebirdConnection: CustomStringConvertible {

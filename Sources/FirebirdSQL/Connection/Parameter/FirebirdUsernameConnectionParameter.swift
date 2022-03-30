@@ -7,7 +7,7 @@
 
 import fbclient
 
-struct FirebirdUsernameConnectionParameter: FirebirdConnectionParameter {
+public struct FirebirdUsernameConnectionParameter: FirebirdConnectionParameter {
 	
 	public let username: String
 	

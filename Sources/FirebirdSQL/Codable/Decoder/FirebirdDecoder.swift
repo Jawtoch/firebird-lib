@@ -9,9 +9,11 @@ import Foundation
 
 public class FirebirdDecoder {
 	
+	public init() { }
+	
 	public func decode<T>(_ type: T.Type, from data: Data?, context: FirebirdCodingContext) throws -> T where T: Decodable {
 		let decoder = _FirebirdDecoder(context: context, data: data)
-		let value = try T.init(from: decoder)
+		let value = try type.init(from: decoder)
 		
 		return value
 	}

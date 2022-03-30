@@ -28,4 +28,12 @@ extension FirebirdDatabaseWithCustomLogger: FirebirdDatabase {
 	func startTransaction(parameters: FirebirdTransactionParameterBuffer) throws -> FirebirdTransaction {
 		try self.database.startTransaction(parameters: parameters)
 	}
+	
+	func commitTransaction(_ transaction: FirebirdTransaction) throws {
+		try self.database.commitTransaction(transaction)
+	}
+	
+	func rollbackTransaction(_ transaction: FirebirdTransaction) throws {
+		try self.database.rollbackTransaction(transaction)
+	}
 }

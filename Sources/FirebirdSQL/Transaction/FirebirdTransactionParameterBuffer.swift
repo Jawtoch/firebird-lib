@@ -9,7 +9,11 @@ public struct FirebirdTransactionParameterBuffer: ParameterBuffer {
 	
 	public typealias Parameter = FirebirdTransactionParameter
 	
-	public var parameters: [FirebirdTransactionParameter] = []
+	public var parameters: [FirebirdTransactionParameter]
+	
+	public init(parameters: [FirebirdTransactionParameter] = []) {
+		self.parameters = parameters
+	}
 	
 	public mutating func add(parameter: FirebirdTransactionParameter) {
 		self.parameters.append(parameter)

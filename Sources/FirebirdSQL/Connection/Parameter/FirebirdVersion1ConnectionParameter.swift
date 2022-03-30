@@ -15,4 +15,6 @@ public struct FirebirdVersion1ConnectionParameter: FirebirdConnectionParameter {
 	public var rawBytes: [ISC_SCHAR] {
 		[ISC_SCHAR(isc_dpb_version1)]
 	}
+	
+	public init() { }
 }

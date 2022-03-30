@@ -34,7 +34,7 @@ extension FirebirdSingleValueDecodingContainer: FirebirdDecodingContainer {
 extension FirebirdSingleValueDecodingContainer: SingleValueDecodingContainer {
 	
 	func decodeNil() -> Bool {
-		fatalError("Non implemented")
+		self.data == nil
 	}
 	
 	func decode(_ type: Bool.Type) throws -> Bool {
@@ -139,6 +139,11 @@ extension FirebirdSingleValueDecodingContainer: SingleValueDecodingContainer {
 	}
 	
 	func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
+		if type is Optional<T> {
+			// Reference to super decoder
+			let decoder = FirebirdDecoder()
+			return try decoder.decode(T.self, from: self.data, context: self.context)
+		}
 		fatalError("Non implemented")
 	}
 	
