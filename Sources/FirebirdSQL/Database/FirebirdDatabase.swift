@@ -5,11 +5,14 @@
 //  Created by ugo cottin on 09/03/2022.
 //
 
+import fbclient
 import Logging
 
 public protocol FirebirdDatabase {
 	
 	var logger: Logger { get }
+	
+	var handle: isc_db_handle { get }
 	
 	func createStatement(_ query: String) -> FirebirdStatement
 	
@@ -17,10 +20,15 @@ public protocol FirebirdDatabase {
 	
 	func withConnection<T>(_ closure: (FirebirdConnection) throws -> T) rethrows -> T
 	
+	// MARK: - Query
+	func query(_ queryString: String, parameters: [Encodable]) throws -> FirebirdQuery
+	
 	// MARK: - Transaction
 	var inTransaction: Bool { get }
 	
-	func startTransaction(parameters: FirebirdTransactionParameterBuffer) throws -> FirebirdDatabase
+	var transactionalDatabase: FirebirdDatabaseInTransaction? { get }
+	
+	func startTransaction(parameters: FirebirdTransactionParameterBuffer?) throws -> FirebirdDatabase
 	
 	func commitTransaction() throws -> FirebirdDatabase
 	

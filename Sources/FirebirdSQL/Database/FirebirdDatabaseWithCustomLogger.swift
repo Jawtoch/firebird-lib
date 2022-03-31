@@ -6,6 +6,7 @@
 //
 
 import Logging
+import fbclient
 
 internal struct FirebirdDatabaseWithCustomLogger {
 	let database: FirebirdDatabase
@@ -13,6 +14,10 @@ internal struct FirebirdDatabaseWithCustomLogger {
 }
 
 extension FirebirdDatabaseWithCustomLogger: FirebirdDatabase {
+	var handle: isc_db_handle {
+		self.database.handle
+	}
+	
 	func createStatement(_ query: String) -> FirebirdStatement {
 		self.database.createStatement(query)
 	}
@@ -25,12 +30,21 @@ extension FirebirdDatabaseWithCustomLogger: FirebirdDatabase {
 		try self.database.withConnection(closure)
 	}
 	
+	// MARK: - Query
+	func query(_ queryString: String, parameters: [Encodable]) throws -> FirebirdQuery {
+		try self.database.query(queryString, parameters: parameters)
+	}
+	
 	// MARK: - Transaction
 	var inTransaction: Bool {
 		self.database.inTransaction
 	}
 	
-	func startTransaction(parameters: FirebirdTransactionParameterBuffer) throws -> FirebirdDatabase {
+	var transactionalDatabase: FirebirdDatabaseInTransaction? {
+		self.database.transactionalDatabase
+	}
+	
+	func startTransaction(parameters: FirebirdTransactionParameterBuffer?) throws -> FirebirdDatabase {
 		try self.database.startTransaction(parameters: parameters)
 			.logging(to: self.logger)
 	}
@@ -44,4 +58,12 @@ extension FirebirdDatabaseWithCustomLogger: FirebirdDatabase {
 		try self.database.rollbackTransaction()
 			.logging(to: self.logger)
 	}
+}
+
+extension FirebirdDatabaseWithCustomLogger: CustomStringConvertible {
+	
+	var description: String {
+		"\(self.database)"
+	}
+	
 }

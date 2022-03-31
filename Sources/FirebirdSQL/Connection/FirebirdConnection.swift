@@ -12,7 +12,7 @@ public class FirebirdConnection {
 	
 	public let logger: Logger
 	
-	var handle: isc_db_handle
+	public var handle: isc_db_handle
 	
 	public var isClosed: Bool {
 		self.handle <= 0
@@ -119,17 +119,26 @@ extension FirebirdConnection: FirebirdDatabase {
 		try closure(self)
 	}
 	
+	// MARK: - Query
+	public func query(_ queryString: String, parameters: [Encodable]) throws -> FirebirdQuery {
+		throw FirebirdCustomError(reason: "Unable to make query without transaction")
+	}
+	
 	// MARK: - Transaction
 	public var inTransaction: Bool {
 		false
 	}
 	
-	public func startTransaction(parameters: FirebirdTransactionParameterBuffer) throws -> FirebirdDatabase {
+	public var transactionalDatabase: FirebirdDatabaseInTransaction? {
+		nil
+	}
+	
+	public func startTransaction(parameters: FirebirdTransactionParameterBuffer?) throws -> FirebirdDatabase {
 		var status = FirebirdVectorError.vector
 		var transactionHandle: isc_tr_handle = .zero
 		
-		let parametersBuffer = parameters.parameters.flatMap { $0.rawBytes }
-		
+		let parametersBuffer = parameters?.parameters.flatMap { $0.rawBytes } ?? []
+				
 		try parametersBuffer.withUnsafeBufferPointer { bufferPointer in
 			try withUnsafeMutablePointer(to: &self.handle) { databaseHandle in
 				guard let bufferLength = Int(exactly: bufferPointer.count) else {
@@ -175,7 +184,7 @@ extension FirebirdConnection: FirebirdDatabase {
 extension FirebirdConnection: CustomStringConvertible {
 	
 	public var description: String {
-		"\(self.handle)"
+		"Connection(handle: \(self.handle))"
 	}
 	
 }
