@@ -1,5 +1,9 @@
 # firebird-lib
 
+## IMPORTANT NOTE
+
+The project is not down at all! I work on it from time to time, and I want to publish a better version soon!
+
 Firebird Swift Wrapper.
 It require Clibfbclient, please see [installation procedure](https://github.com/Jawtoch/Clibfbclient/blob/main/README.md#clibfbclient).
 
