@@ -1,8 +1,8 @@
 .DS_Store
 /.build
 /Packages
+Package.resolved
 /*.xcodeproj
 xcuserdata/
-.swiftpm
-Package.resolved
-/.idea
+DerivedData/
+/.swiftpm

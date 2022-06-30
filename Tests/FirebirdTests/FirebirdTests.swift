@@ -1,136 +1,72 @@
 //
 //  FirebirdTests.swift
-//  
 //
-//  Created by ugo cottin on 21/03/2021.
+//
+//  Created by ugo cottin on 24/06/2022.
 //
 
-import XCTest
-@testable import Firebird
+import Firebird
+import Foundation
 
-final class FirebirdTests: XCTestCase {
+private func requireEnv(_ name: String) -> String {
+	guard let value = ProcessInfo.processInfo.environment[name] else {
+		fatalError("The environment variable \(name) must be set")
+	}
+	
+	return value
+}
 
-	private var hostname: String {
-		guard let hostname = ProcessInfo.processInfo.environment["FB_TEST_HOSTNAME"] else {
-			fatalError("FB_TEST_HOSTNAME is not defined")
-		}
-		
-		return hostname
+final class FirebirdTests {
+    	
+	static var hostname: String {
+		requireEnv("FB_TEST_HOSTNAME")
 	}
 	
-	private var port: UInt16? {
-		guard let port = ProcessInfo.processInfo.environment["FB_TEST_PORT"] else { return nil }
-		
-		return UInt16(port)
+	static var port: UInt16 {
+		UInt16(requireEnv("FB_TEST_PORT"))!
 	}
 	
-	private var username: String {
-		guard let username = ProcessInfo.processInfo.environment["FB_TEST_USERNAME"] else {
-			fatalError("FB_TEST_USERNAME is not defined")
-		}
-		
-		return username
+	static var path: String {
+		requireEnv("FB_TEST_DATABASE")
 	}
 	
-	private var password: String {
-		guard let password = ProcessInfo.processInfo.environment["FB_TEST_PASSWORD"] else {
-			fatalError("FB_TEST_PASSWORD is not defined")
-		}
-		
-		return password
+	static var username: String {
+		requireEnv("FB_TEST_USERNAME")
 	}
 	
-	private var database: String {
-		guard let database = ProcessInfo.processInfo.environment["FB_TEST_DATABASE"] else {
-			fatalError("FB_TEST_DATABASE is not defined")
-		}
-		
-		return database
+	static var password: String {
+		requireEnv("FB_TEST_PASSWORD")
 	}
 	
-	private var configuration: FirebirdConnectionConfiguration {
+	static var databaseTarget: FirebirdConnectionConfiguration.Target {
+		.remote(
+			hostName: self.hostname,
+			port: self.port,
+			path: self.path)
+	}
+	
+	static var configuration: FirebirdConnectionConfiguration {
 		.init(
-			hostname: self.hostname,
-			port: self.port,
-			username: self.username,
-			password: self.password,
-			database: self.database)
+			target: self.databaseTarget,
+			parameters: [
+				.version1,
+				.username(self.username),
+				.password(self.password)
+			])
 	}
 	
-	private var connection: FirebirdConnection!
+//	func testConnect() throws {
+//		let connection = FBConnection(
+//			configuration: self.configuration,
+//			logger: self.logger,
+//			on: self.eventLoop)
+//		XCTAssertTrue(connection.isClosed)
+//
+//		try connection.connect().wait()
+//		XCTAssertFalse(connection.isClosed)
+//
+//		try connection.close().wait()
+//		XCTAssertTrue(connection.isClosed)
+//	}
 	
-	override func setUpWithError() throws {
-		self.connection = try FirebirdConnection.connect(configuration)
-	}
-	
-	override func tearDownWithError() throws {
-		try self.connection?.close()
-	}
-	
-	func testConnect() throws {
-		let connection = try FirebirdConnection.connect(configuration)
-		XCTAssertTrue(connection.isOpened)
-		try connection.close()
-	}
-	
-	func testClosingClosedConnection() throws {
-		try self.connection.close()
-		try self.connection.close()
-	}
-	
-	func testConnectWithDefaultPort() throws {
-		let configuration = FirebirdConnectionConfiguration(
-			hostname: self.hostname,
-			username: self.username,
-			password: self.password,
-			database: self.database)
-		let connection = try FirebirdConnection.connect(configuration)
-		XCTAssertTrue(connection.isOpened)
-		try connection.close()
-	}
-	
-	func testConnectWithWrongCredentials() throws {
-		let configuration = FirebirdConnectionConfiguration(
-			hostname: self.hostname,
-			port: self.port,
-			username: "Foo",
-			password: "Bar",
-			database: self.database)
-		XCTAssertThrowsError(try FirebirdConnection.connect(configuration))
-	}
-	
-	func testTransaction() throws {
-		let transaction = try self.connection.startTransaction(on: self.connection)
-		XCTAssertTrue(transaction.isOpened)
-		try self.connection.commitTransaction(transaction)
-	}
-	
-	func testRollbackTransaction() throws {
-		let transaction = try self.connection.startTransaction(on: self.connection)
-		XCTAssertTrue(transaction.isOpened)
-		try self.connection.rollbackTransaction(transaction)
-	}
-    
-    func testQuery() throws {
-        try self.connection.query("SELECT phone_ext FROM employee WHERE emp_no = 2") { row in
-            for (column, dataConvertible) in row.values {
-				let value: String
-				if let data = dataConvertible.data {
-					value = String(data, using: dataConvertible.context) ?? "<null>"
-				} else {
-					value = "<null>"
-				}
-                print(row.index, column, value)
-            }
-        }
-    }
-	
-	static var allTests = [
-		("testConnect", testConnect),
-		("testClosingClosedConnection", testClosingClosedConnection),
-		("testConnectWithDefaultPort", testConnectWithDefaultPort),
-		("testConnectWithWrongCredentials", testConnectWithWrongCredentials),
-		("testTransaction", testTransaction),
-		("testRollbackTransaction", testRollbackTransaction),
-	]
 }

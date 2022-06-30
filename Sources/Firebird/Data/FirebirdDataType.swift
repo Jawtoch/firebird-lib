@@ -1,68 +1,86 @@
 //
 //  FirebirdDataType.swift
-//  
 //
-//  Created by Ugo Cottin on 10/03/2021.
+//
+//  Created by ugo cottin on 25/06/2022.
 //
 
-public struct FirebirdDataType: RawRepresentable, Equatable {
+import CFirebird
+
+public struct FirebirdDataType: RawRepresentable {
 	
 	public typealias RawValue = Int32
 	
 	/// String of fixed length
-	public static let text = FirebirdDataType(452)
+	public static let text = FirebirdDataType(SQL_TEXT)
 	
 	/// String of variable length
-	public static let varying = FirebirdDataType(448)
+	public static let varying = FirebirdDataType(SQL_VARYING)
 	
 	/// Signed integer of 16 bits
-	public static let short = FirebirdDataType(500)
+	public static let short = FirebirdDataType(SQL_SHORT)
 	
 	/// Signed integer of 32 bits
-	public static let long = FirebirdDataType(496)
+	public static let long = FirebirdDataType(SQL_LONG)
 	
-	public static let float = FirebirdDataType(482)
+	public static let float = FirebirdDataType(SQL_FLOAT)
 	
-	public static let double = FirebirdDataType(480)
+	public static let double = FirebirdDataType(SQL_DOUBLE)
 	
-	public static let d_float = FirebirdDataType(530)
+	public static let d_float = FirebirdDataType(SQL_D_FLOAT)
 	
 	/// Date and time
-	public static let timestamp = FirebirdDataType(510)
+	public static let timestamp = FirebirdDataType(SQL_TIMESTAMP)
 	
-	public static let blob = FirebirdDataType(520)
+	public static let blob = FirebirdDataType(SQL_BLOB)
 	
-	public static let array = FirebirdDataType(540)
+	public static let array = FirebirdDataType(SQL_ARRAY)
 	
-	public static let quad = FirebirdDataType(550)
+	public static let quad = FirebirdDataType(SQL_QUAD)
 	
 	/// Time only
-	public static let time = FirebirdDataType(560)
+	public static let time = FirebirdDataType(SQL_TYPE_TIME)
 	
 	/// Date only
-	public static let date = FirebirdDataType(570)
+	public static let date = FirebirdDataType(SQL_TYPE_DATE)
 	
-	public static let int64 = FirebirdDataType(580)
+	public static let int64 = FirebirdDataType(SQL_INT64)
 	
-	public static let null = FirebirdDataType(32766)
+	public static let null = FirebirdDataType(SQL_NULL)
 	
 	public let rawValue: Int32
 	
-	public init(_ rawValue: RawValue) {
-		self.rawValue = rawValue & ~1
+	public var isNullable: Bool {
+		(self.rawValue & 1) != 0
 	}
 	
-	public init?(rawValue: Int32) {
+	private init(_ rawValue: RawValue) {
+		self.rawValue = rawValue
+	}
+	
+	public init(rawValue: RawValue) {
 		self.init(rawValue)
 	}
 	
 	public init?(rawValue: Int16) {
-		self.init(Int32(rawValue))
+		guard let shortValue = RawValue(exactly: rawValue) else {
+			return nil
+		}
+		
+		self.init(rawValue: shortValue)
 	}
 }
 
+extension FirebirdDataType: Equatable {
+	
+	public static func == (lhs: Self, rhs: Self) -> Bool {
+		(lhs.rawValue & ~1) == (rhs.rawValue & ~1)
+	}
+	
+}
+
 extension FirebirdDataType: CustomStringConvertible {
-	var sqlName: String {
+	public var sqlName: String {
 		switch self {
 			case .text: return "TEXT"
 			case .varying: return "VARYING"
@@ -84,6 +102,7 @@ extension FirebirdDataType: CustomStringConvertible {
 	}
 	
 	public var description: String {
-		return self.sqlName
+		"\(self.sqlName)\(self.isNullable ? "?" : "")"
 	}
 }
+

@@ -2,20 +2,76 @@
 //  FirebirdTransaction.swift
 //  
 //
-//  Created by Ugo Cottin on 23/03/2021.
+//  Created by ugo cottin on 24/06/2022.
 //
 
-public class FirebirdTransaction {
+import CFirebird
+import NIOCore
+import Logging
+
+public protocol FirebirdTransaction {
 	
-	public var handle: isc_tr_handle
+	var logger: Logger { get }
 	
-	/// If the transaction is opened
-	public var isOpened: Bool {
-		self.handle > 0
+	var eventLoop: EventLoop { get }
+	
+	var isClosed: Bool { get }
+	
+	func commit() -> EventLoopFuture<Void>
+	
+	func rollback() -> EventLoopFuture<Void>
+}
+
+public class FBTransaction: FirebirdTransaction {
+	
+	internal var handle: isc_tr_handle
+	
+	public let logger: Logger
+	
+	public let eventLoop: EventLoop
+	
+	public var isClosed: Bool {
+		self.handle <= 0
 	}
 	
-	public init(handle: isc_tr_handle = 0) {
+	public init(handle: isc_tr_handle, logger: Logger, on eventLoop: EventLoop) {
 		self.handle = handle
+		self.logger = logger
+		self.eventLoop = eventLoop
+	}
+	
+	public func commit() -> EventLoopFuture<Void> {
+		guard !self.isClosed else {
+			self.logger.warning("Trying to commit closed transaction")
+			return self.eventLoop.makeSucceededVoidFuture()
+		}
+		
+		let id = self.handle
+		self.logger.info("Commit transaction \(id)")
+		return self.eventLoop.submit {
+			try withStatus { status in
+				isc_commit_transaction(&status, &self.handle)
+			}
+		}.map {
+			self.logger.info("Transaction \(id) committed")
+		}
+	}
+	
+	public func rollback() -> EventLoopFuture<Void> {
+		guard !self.isClosed else {
+			self.logger.warning("Trying to rollback closed transaction")
+			return self.eventLoop.makeSucceededVoidFuture()
+		}
+		
+		let id = self.handle
+		self.logger.info("Rollback transaction \(id)")
+		return self.eventLoop.submit {
+			try withStatus { status in
+				isc_rollback_transaction(&status, &self.handle)
+			}
+		}.map {
+			self.logger.info("Transaction \(id) rolled back")
+		}
 	}
 	
 }
