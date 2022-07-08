@@ -8,12 +8,24 @@
 import CFirebird
 import Foundation
 
+/// Wrapper of XSQLVAR data structure
+/// Used to bind data to a query placeholder
 public class FirebirdBind {
 	
+	public enum Error: FirebirdError {
+		case noDataStorage
+		case noNilStorage
+		case valueRequired
+	}
+	
+	/// Underlying Firebird type
 	public typealias ReferenceType = XSQLVAR
 	
+	/// 
 	public let handle: UnsafeMutablePointer<ReferenceType>
 	
+	/// Bind with data at given memory pointer
+	/// - Parameter handle: Pointer to allocated memory of type `ReferenceType`
 	public init(handle: UnsafeMutablePointer<ReferenceType>) {
 		self.handle = handle
 	}
@@ -95,7 +107,7 @@ public class FirebirdBind {
 	public func getData() throws -> Data? {
 		if self.type.isNullable {
 			guard let unsafeNilStorage = self.unsafeNilStorage else {
-				fatalError()
+				throw Error.noNilStorage
 			}
 			
 			if unsafeNilStorage.pointee == -1 {
@@ -104,7 +116,7 @@ public class FirebirdBind {
 		}
 		
 		guard let unsafeDataStorage = self.unsafeDataStorage else {
-			fatalError()
+			throw Error.noDataStorage
 		}
 		
 		return Data(bytes: unsafeDataStorage, count: Int(self.size))
@@ -114,7 +126,7 @@ public class FirebirdBind {
 	public func setData(_ data: Data?) throws {
 		if let data = data {
 			guard let unsafeDataStorage = self.unsafeDataStorage else {
-				fatalError()
+				throw Error.noDataStorage
 			}
 			
 			let dataSize = min(data.count, Int(self.size))
@@ -122,18 +134,18 @@ public class FirebirdBind {
 			
 			if self.type.isNullable {
 				guard let unsafeNilStorage = self.unsafeNilStorage else {
-					fatalError()
+					throw Error.noNilStorage
 				}
 
 				unsafeNilStorage.pointee = -1
 			}
 		} else {
 			guard self.type.isNullable else {
-				fatalError()
+				throw Error.valueRequired
 			}
 			
 			guard let unsafeNilStorage = self.unsafeNilStorage else {
-				fatalError()
+				throw Error.noNilStorage
 			}
 			
 			unsafeNilStorage.pointee = -1

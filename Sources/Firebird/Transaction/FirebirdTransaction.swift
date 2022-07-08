@@ -1,77 +1,24 @@
-//
-//  FirebirdTransaction.swift
-//  
-//
-//  Created by ugo cottin on 24/06/2022.
-//
-
 import CFirebird
 import NIOCore
 import Logging
 
+/// Reference to a database transaction
 public protocol FirebirdTransaction {
 	
+	/// Transaction logger
 	var logger: Logger { get }
 	
+	/// Transaction event loop
 	var eventLoop: EventLoop { get }
 	
+	/// Indicate if the transaction is closed (commited or rolled back)
 	var isClosed: Bool { get }
 	
+	/// Commit the transaction
+	/// - Returns: an empty future completed when the transaction is commited
 	func commit() -> EventLoopFuture<Void>
-	
-	func rollback() -> EventLoopFuture<Void>
-}
 
-public class FBTransaction: FirebirdTransaction {
-	
-	internal var handle: isc_tr_handle
-	
-	public let logger: Logger
-	
-	public let eventLoop: EventLoop
-	
-	public var isClosed: Bool {
-		self.handle <= 0
-	}
-	
-	public init(handle: isc_tr_handle, logger: Logger, on eventLoop: EventLoop) {
-		self.handle = handle
-		self.logger = logger
-		self.eventLoop = eventLoop
-	}
-	
-	public func commit() -> EventLoopFuture<Void> {
-		guard !self.isClosed else {
-			self.logger.warning("Trying to commit closed transaction")
-			return self.eventLoop.makeSucceededVoidFuture()
-		}
-		
-		let id = self.handle
-		self.logger.info("Commit transaction \(id)")
-		return self.eventLoop.submit {
-			try withStatus { status in
-				isc_commit_transaction(&status, &self.handle)
-			}
-		}.map {
-			self.logger.info("Transaction \(id) committed")
-		}
-	}
-	
-	public func rollback() -> EventLoopFuture<Void> {
-		guard !self.isClosed else {
-			self.logger.warning("Trying to rollback closed transaction")
-			return self.eventLoop.makeSucceededVoidFuture()
-		}
-		
-		let id = self.handle
-		self.logger.info("Rollback transaction \(id)")
-		return self.eventLoop.submit {
-			try withStatus { status in
-				isc_rollback_transaction(&status, &self.handle)
-			}
-		}.map {
-			self.logger.info("Transaction \(id) rolled back")
-		}
-	}
-	
+	/// Rollback the transaction
+	/// - Returns: an empty future completed when the transaction is rolled back
+	func rollback() -> EventLoopFuture<Void>
 }

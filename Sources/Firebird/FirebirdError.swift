@@ -7,44 +7,8 @@
 
 import CFirebird
 
-public typealias FirebirdStatus = [ISC_STATUS]
-
-public protocol Factory {
+public protocol FirebirdError: Error {
 	
-	associatedtype Produced
-	
-	func next() -> Produced
-	
-}
-
-public struct FirebirdStatusFactory: Factory {
-	
-	public typealias Produced = FirebirdStatus
-	
-	public static var statusLength: Int {
-		Int(ISC_STATUS_LENGTH)
-	}
-	
-	public static var shared: Self {
-		if let instance = self.instance {
-			return instance
-		}
-		
-		let new = FirebirdStatusFactory()
-		self.instance = new
-		
-		return new
-	}
-	
-	private static var instance: FirebirdStatusFactory?
-	
-	public func next() -> FirebirdStatus {
-		.init(repeating: 0, count: Self.statusLength)
-	}
-}
-
-public enum FirebirdError: Error {
-	case error
 }
 
 func withStatus(_ closure: (inout FirebirdStatus) throws -> ()) throws {
@@ -55,7 +19,7 @@ func withStatus(_ closure: (inout FirebirdStatus) throws -> ()) throws {
 	}
 }
 
-public struct FirebirdNativeError: Error, CustomStringConvertible {
+public struct FirebirdNativeError: FirebirdError, CustomStringConvertible {
 	
 	public static var decodingBufferLength: Int16 = 1024 {
 		willSet {
