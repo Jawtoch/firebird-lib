@@ -1,25 +1,30 @@
-//
-//  FirebirdConnectionParameter.swift
-//
-//
-//  Created by ugo cottin on 24/06/2022.
-//
-
 import CFirebird
 
+/// Parameter for connection
 public enum FirebirdConnectionParameter: RawRepresentable {
 
 	public typealias RawValue = [ISC_SCHAR]
 		
+	/// Version of the parameter buffer, required.
 	case version1
+	
+	/// String user name, up to 255 characters.
 	case username(_: String)
+	
+	/// String password, up to 255 characters.
 	case password(_: String)
+	
+	/// Custom value.
+	/// Use this case for non implemented parameter or for debugging or testing
 	case custom(_: RawValue)
 	
+	/// Initialize a parameter with given bytes.
+	/// - Parameter rawValue: parameter value
 	public init(rawValue: RawValue) {
 		self = .custom(rawValue)
 	}
 	
+	/// Raw bytes of the parameter
 	public var rawValue: RawValue {
 		switch self {
 			case .version1:
