@@ -1,10 +1,3 @@
-//
-//  FirebirdBind.swift
-//  
-//
-//  Created by Ugo Cottin on 28/06/2022.
-//
-
 import CFirebird
 import Foundation
 
@@ -15,13 +8,13 @@ public class FirebirdBind {
 	public enum Error: FirebirdError {
 		case noDataStorage
 		case noNilStorage
-		case valueRequired
+		case valueNotNullable
 	}
 	
 	/// Underlying Firebird type
 	public typealias ReferenceType = XSQLVAR
 	
-	/// 
+	/// Handle used to access the `XSQLVAR` structure allocated for the Firebird C library.
 	public let handle: UnsafeMutablePointer<ReferenceType>
 	
 	/// Bind with data at given memory pointer
@@ -30,6 +23,7 @@ public class FirebirdBind {
 		self.handle = handle
 	}
 	
+	/// Type of the bind value.
 	public var type: FirebirdDataType {
 		get {
 			FirebirdDataType(rawValue: self.handle.pointee.sqltype)!
@@ -39,6 +33,7 @@ public class FirebirdBind {
 		}
 	}
 	
+	/// Specifies the subtype for Blob data.
 	public var subType: FirebirdDataType {
 		get {
 			FirebirdDataType(rawValue: self.handle.pointee.sqlsubtype)!
@@ -48,6 +43,8 @@ public class FirebirdBind {
 		}
 	}
 	
+	/// Scale of the bind value, used for floating point integers.
+	/// Provides scale, specified as a negative number, for exact numeric data types (short, long, double or int64)
 	public var scale: ISC_SHORT {
 		get {
 			self.handle.pointee.sqlscale
@@ -57,6 +54,7 @@ public class FirebirdBind {
 		}
 	}
 	
+	/// Count of bytes in the data
 	public var length: ISC_SHORT {
 		get {
 			self.handle.pointee.sqllen
@@ -66,26 +64,32 @@ public class FirebirdBind {
 		}
 	}
 	
+	/// Name of the column defined in the query
 	public var name: String {
 		String(cString: &self.handle.pointee.aliasname.0)
 	}
 	
+	/// Name of the column in the database
 	public var originalName: String {
 		String(cString: &self.handle.pointee.sqlname.0)
 	}
 	
+	/// Name of the table owner
 	public var tableOwner: String {
 		String(cString: &self.handle.pointee.ownname.0)
 	}
 	
+	/// Name of the table
 	public var tableName: String {
 		String(cString: &self.handle.pointee.relname.0)
 	}
 	
+	/// Count of bytes in the data, with the metadata (used of varying strings)
 	public var size: Int16 {
 		self.length + (self.type == .varying ? 2 : 0)
 	}
 	
+	/// Pointer to an allocated memory for storing bind data value
 	public var unsafeDataStorage: UnsafeMutablePointer<ISC_SCHAR>? {
 		get {
 			self.handle.pointee.sqldata
@@ -95,6 +99,7 @@ public class FirebirdBind {
 		}
 	}
 	
+	/// Pointer to an allocated memory for storing nil indicating value
 	public var unsafeNilStorage: UnsafeMutablePointer<ISC_SHORT>? {
 		get {
 			self.handle.pointee.sqlind
@@ -104,6 +109,10 @@ public class FirebirdBind {
 		}
 	}
 	
+	/// Get the data stored in the bind.
+	/// If the value is nullable, a storage for the nil indicator value is required
+	/// - Returns: the data stored in the bind
+	/// - Throws: if no storage is provided for data and / or nil indicator value
 	public func getData() throws -> Data? {
 		if self.type.isNullable {
 			guard let unsafeNilStorage = self.unsafeNilStorage else {
@@ -123,6 +132,10 @@ public class FirebirdBind {
 
 	}
 	
+	/// Set the bind data.
+	/// If the value is nullable, a storage for the nil indicator value is required
+	/// - Parameter data: bind data
+	/// - Throws: if no storage is provided for data and / or nil indicator value.
 	public func setData(_ data: Data?) throws {
 		if let data = data {
 			guard let unsafeDataStorage = self.unsafeDataStorage else {
@@ -141,7 +154,7 @@ public class FirebirdBind {
 			}
 		} else {
 			guard self.type.isNullable else {
-				throw Error.valueRequired
+				throw Error.valueNotNullable
 			}
 			
 			guard let unsafeNilStorage = self.unsafeNilStorage else {
