@@ -1,10 +1,3 @@
-//
-//  FBConnection+FirebirdDatabase.swift
-//  
-//
-//  Created by ugo cottin on 24/06/2022.
-//
-
 import NIOCore
 
 extension FBConnection: FirebirdDatabase {
