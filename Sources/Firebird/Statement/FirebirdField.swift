@@ -1,10 +1,3 @@
-//
-//  FirebirdField.swift
-//
-//
-//  Created by ugo cottin on 25/06/2022.
-//
-
 import CFirebird
 import Foundation
 

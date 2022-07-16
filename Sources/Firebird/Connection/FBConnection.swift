@@ -4,6 +4,10 @@ import NIOCore
 
 public class FBConnection: FirebirdConnection {
 	
+	public enum Error: FirebirdError {
+		case tooManyParameters(count: Int, maximum: Int)
+	}
+	
 	public let eventLoop: EventLoop
 	
 	public let logger: Logger
@@ -38,13 +42,17 @@ public class FBConnection: FirebirdConnection {
 		
 		return self.eventLoop.submit {
 			try parametersBuffer.withUnsafeBufferPointer { unsafeParametersBuffer in
+				guard let parametersCount = Int16(exactly: unsafeParametersBuffer.count) else {
+					throw Error.tooManyParameters(count: unsafeParametersBuffer.count, maximum: Int(Int16.max))
+				}
+				
 				try withStatus { status in
 					isc_attach_database(
 						&status,
 						0,
 						attachUrl,
 						&self.handle,
-						Int16(unsafeParametersBuffer.count),
+						parametersCount,
 						unsafeParametersBuffer.baseAddress)
 				}
 			}

@@ -91,7 +91,7 @@ public class FBReusableStatement {
 		/// - Throws: if the statement state is not `cursorOpen`, or if the fetch function call returns an error
 		public mutating func fetchAll() throws -> [FirebirdRow] {
 			guard self.statement.stateIs(.cursorOpen) else {
-				fatalError()
+				throw Error.invalidState(current: self.statement.state, expected: .cursorOpen)
 			}
 			
 			var rows: [FirebirdRow] = []
@@ -109,7 +109,7 @@ public class FBReusableStatement {
 		/// - Throws: if the statement state is not `cursorOpen`, or if an error occured while closing the cursor.
 		public func close() throws {
 			guard self.statement.stateIs(.cursorOpen) else {
-				fatalError()
+				throw Error.invalidState(current: self.statement.state, expected: .cursorOpen)
 			}
 			
 			// Note: does the cursor close itself, or the statement close all opened cursor ?
@@ -168,6 +168,13 @@ public class FBReusableStatement {
 			}
 		}
 		
+	}
+	
+	public enum Error: FirebirdError {
+		case invalidState(current: State, expected: State)
+		case notAllocated
+		case connectionClosed
+		case transactionClosed
 	}
 	
 	public struct FreeOption: RawRepresentable, Equatable, CustomStringConvertible {
@@ -293,15 +300,15 @@ public class FBReusableStatement {
 	public func allocate(on connection: FBConnection) throws {
 		self.logger.debug("Allocating \(self) on \(connection)")
 		guard self.stateIs(.new) else {
-			fatalError()
+			throw Error.invalidState(current: self.state, expected: .new)
 		}
 		
 		guard !self.isAllocated else {
-			fatalError()
+			throw Error.notAllocated
 		}
 		
 		guard !connection.isClosed else {
-			fatalError()
+			throw Error.connectionClosed
 		}
 		
 		try withStatus { status in
@@ -319,15 +326,15 @@ public class FBReusableStatement {
 	public func prepare(on transaction: FBTransaction) throws {
 		self.logger.debug("Preparing \(self) on \(transaction)")
 		guard self.stateIs(.allocated) else {
-			fatalError()
+			throw Error.invalidState(current: self.state, expected: .allocated)
 		}
 		
 		guard self.isAllocated else {
-			fatalError()
+			throw Error.notAllocated
 		}
 		
 		guard !transaction.isClosed else {
-			fatalError()
+			throw Error.transactionClosed
 		}
 		
 		try withStatus { status in
@@ -354,7 +361,7 @@ public class FBReusableStatement {
 	func unprepare() throws {
 		self.logger.debug("Unpreparing \(self)")
 		guard self.stateIs(.prepared) else {
-			fatalError()
+			throw Error.invalidState(current: self.state, expected: .prepared)
 		}
 		
 		try self.free(.unprepare)
@@ -418,11 +425,11 @@ public class FBReusableStatement {
 	public func execute(on transaction: FBTransaction, input: FirebirdBindings? = nil) throws {
 		self.logger.debug("Executing \(self) on \(transaction)")
 		guard self.stateIs(.prepared) else {
-			fatalError()
+			throw Error.invalidState(current: self.state, expected: .prepared)
 		}
 		
 		guard !transaction.isClosed else {
-			fatalError()
+			throw Error.transactionClosed
 		}
 		
 		try withStatus { status in
@@ -442,7 +449,7 @@ public class FBReusableStatement {
 	public func openCursor(_ name: String, output: FirebirdBindings) throws -> Cursor {
 		self.logger.debug("Opening cursor \(name) on \(self)")
 		guard self.stateIs(.executed) else {
-			fatalError()
+			throw Error.invalidState(current: self.state, expected: .executed)
 		}
 		
 		try withStatus { status in
