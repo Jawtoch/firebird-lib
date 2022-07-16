@@ -2,7 +2,7 @@
 public struct FirebirdRow {
 	
 	public enum Error: FirebirdError {
-		case unkonwnColumn(column: String)
+		case unknownColumn(column: String)
 	}
 	
 	/// Index
@@ -43,7 +43,7 @@ public struct FirebirdRow {
 	/// - Throws: If the type `type` failed to initialize from the column field data.
 	public func decode<T>(column: String, as type: T.Type) throws -> T where T : FirebirdDataConvertible {
 		guard let field = self.field(ofColumn: column) else {
-			throw Error.unkonwnColumn(column: column)
+			throw Error.unknownColumn(column: column)
 		}
 		
 		return try T.init(firebirdData: field.data)
