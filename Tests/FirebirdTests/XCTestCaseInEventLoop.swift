@@ -1,27 +1,20 @@
-//
-//  XCTestCaseInEventLoop.swift
-//  
-//
-//  Created by ugo cottin on 30/06/2022.
-//
-
-import XCTest
 import NIOCore
 import NIOPosix
+import XCTest
 
-class XCTestCaseInEventLoop: XCTestCase {
+public class XCTestCaseInEventLoop: XCTestCase {
 
-	var eventLoopGroup: EventLoopGroup!
+	public var eventLoopGroup: EventLoopGroup!
 	
-	var eventLoop: EventLoop {
+	public var eventLoop: EventLoop {
 		self.eventLoopGroup.next()
 	}
 	
-    override func setUpWithError() throws {
+    override public func setUpWithError() throws {
 		self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
     }
 
-    override func tearDown() async throws {
+    override public func tearDown() async throws {
 		try await self.eventLoopGroup.shutdownGracefully()
     }
 	

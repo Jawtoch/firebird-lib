@@ -1,10 +1,3 @@
-//
-//  FirebirdTests.swift
-//
-//
-//  Created by ugo cottin on 24/06/2022.
-//
-
 import Firebird
 import Foundation
 
@@ -54,19 +47,5 @@ final class FirebirdTests {
 				.password(self.password)
 			])
 	}
-	
-//	func testConnect() throws {
-//		let connection = FBConnection(
-//			configuration: self.configuration,
-//			logger: self.logger,
-//			on: self.eventLoop)
-//		XCTAssertTrue(connection.isClosed)
-//
-//		try connection.connect().wait()
-//		XCTAssertFalse(connection.isClosed)
-//
-//		try connection.close().wait()
-//		XCTAssertTrue(connection.isClosed)
-//	}
 	
 }

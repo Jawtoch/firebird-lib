@@ -1,10 +1,3 @@
-//
-//  FirebirdConnectionTests.swift
-//  
-//
-//  Created by ugo cottin on 30/06/2022.
-//
-
 import Logging
 import NIOCore
 import XCTest
