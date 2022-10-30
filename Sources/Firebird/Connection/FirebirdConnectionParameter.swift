@@ -1,10 +1,9 @@
 import CFirebird
 
-/// Parameter for connection
 public enum FirebirdConnectionParameter: RawRepresentable {
-
+	
 	public typealias RawValue = [ISC_SCHAR]
-		
+	
 	/// Version of the parameter buffer, required.
 	case version1
 	
@@ -39,4 +38,5 @@ public enum FirebirdConnectionParameter: RawRepresentable {
 				return bytes
 		}
 	}
+	
 }

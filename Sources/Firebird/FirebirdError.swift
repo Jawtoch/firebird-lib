@@ -1,4 +1,5 @@
 import CFirebird
+import Foundation
 
 /// Generic protocol used for all errors defined in the package.
 public protocol FirebirdError: Error {
