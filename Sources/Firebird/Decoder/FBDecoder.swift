@@ -180,7 +180,7 @@ fileprivate func _decodeVaryingAsString(data: FirebirdData) throws -> String {
     
     let payload = data[startIndex ..< startIndex + size]
     
-    guard let value = String(data: payload, encoding: .utf8) else {
+    guard let value = String(data: payload, encoding: .utf8) ?? String(data: payload, encoding: .ascii) else {
         fatalError("not implemented")
     }
     
