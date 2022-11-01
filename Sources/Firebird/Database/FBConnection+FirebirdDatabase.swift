@@ -70,7 +70,7 @@ extension FBConnection: FirebirdDatabase {
                     allocator.allocate(variable)
                 }
                 
-                try statement.execute(on: transaction)
+                try statement.execute(on: transaction, inputDescriptorArea: inputDescriptorArea)
                 
                 let cursorName = String.random(of: 16)
                 try statement.openCursor(named: cursorName)
