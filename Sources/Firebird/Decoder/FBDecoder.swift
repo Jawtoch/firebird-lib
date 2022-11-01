@@ -1,3 +1,5 @@
+import Foundation
+
 public class FBDecoder: FirebirdDecoder {
     
     public init() { }
@@ -69,11 +71,41 @@ internal class FBDecoderSingleValueDecodingContainer: SingleValueDecodingContain
     }
     
     func decode(_ type: Double.Type) throws -> Double {
-        fatalError("not implemented")
+        guard let bytes = self.data.value else {
+            fatalError("not implemented")
+        }
+        
+        let intValue = Double(bytes.withUnsafeBytes { unsafeBytes in
+            unsafeBytes.load(as: Int32.self)
+        })
+        
+        
+        
+        let scale = fabs(Double(self.data.scale))
+        let multiplier = pow(10.0, scale)
+        
+        let value = intValue / multiplier
+        
+        return value
     }
     
     func decode(_ type: Float.Type) throws -> Float {
-        fatalError("not implemented")
+        guard let bytes = self.data.value else {
+            fatalError("not implemented")
+        }
+        
+        let intValue = Float(bytes.withUnsafeBytes { unsafeBytes in
+            unsafeBytes.load(as: Int32.self)
+        })
+        
+        
+        
+        let scale = fabsf(Float(self.data.scale))
+        let multiplier = pow(10.0, scale)
+        
+        let value = intValue / multiplier
+        
+        return value
     }
     
     func decode(_ type: Int.Type) throws -> Int {
@@ -81,10 +113,19 @@ internal class FBDecoderSingleValueDecodingContainer: SingleValueDecodingContain
         case .int16:
             return Int(try self.decode(Int16.self))
         case .long:
-            if (self.data.value?.count == Int32.bitWidth) {
+            guard let value = self.data.value else {
+                fatalError("not implemented")
+            }
+            
+            let bits = value.count * 8
+            
+            switch bits {
+            case Int32.bitWidth:
                 return Int(try self.decode(Int32.self))
-            } else {
+            case Int64.bitWidth:
                 return Int(try self.decode(Int64.self))
+            default:
+                fatalError("not implemented")
             }
         case .int64:
             return Int(try self.decode(Int64.self))
@@ -110,11 +151,27 @@ internal class FBDecoderSingleValueDecodingContainer: SingleValueDecodingContain
     }
     
     func decode(_ type: Int32.Type) throws -> Int32 {
-        fatalError("not implemented")
+        guard let data = self.data.value else {
+            fatalError("not implemented")
+        }
+        
+        let decoded = data.withUnsafeBytes { unsafeData in
+            unsafeData.load(as: Int32.self)
+        }
+        
+        return decoded
     }
     
     func decode(_ type: Int64.Type) throws -> Int64 {
-        fatalError("not implemented")
+        guard let data = self.data.value else {
+            fatalError("not implemented")
+        }
+        
+        let decoded = data.withUnsafeBytes { unsafeData in
+            unsafeData.load(as: Int64.self)
+        }
+        
+        return decoded
     }
     
     func decode(_ type: UInt.Type) throws -> UInt {
@@ -143,6 +200,14 @@ internal class FBDecoderSingleValueDecodingContainer: SingleValueDecodingContain
         }
         
         if let type = type as? String.Type {
+            return try self.decode(type) as! T
+        }
+        
+        if let type = type as? Float.Type {
+            return try self.decode(type) as! T
+        }
+        
+        if let type = type as? Double.Type {
             return try self.decode(type) as! T
         }
         

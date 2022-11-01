@@ -103,23 +103,57 @@ internal class FBEncoderSingleValueEncodingContainer: SingleValueEncodingContain
     }
     
     func encode(_ value: Int) throws {
-        fatalError("not implemented")
+        switch (self.data.type) {
+        case .int16:
+            try self.encode(Int16(value))
+        case .long:
+            let bits = Int(self.data.length * 8)
+            
+            switch bits {
+            case Int32.bitWidth:
+                try self.encode(Int32(value))
+            case Int64.bitWidth:
+                try self.encode(Int64(value))
+            default:
+                fatalError("not implemented")
+            }
+        case .int64:
+            try self.encode(Int64(value))
+        default:
+            fatalError("not implemented")
+        }
     }
     
     func encode(_ value: Int8) throws {
-        fatalError("not implemented")
+        let bytes = withUnsafeBytes(of: value) { unsafeBytes in
+            Data(unsafeBytes)
+        }
+        
+        self.encoded = bytes
     }
     
     func encode(_ value: Int16) throws {
-        fatalError("not implemented")
+        let bytes = withUnsafeBytes(of: value) { unsafeBytes in
+            Data(unsafeBytes)
+        }
+        
+        self.encoded = bytes
     }
     
     func encode(_ value: Int32) throws {
-        fatalError("not implemented")
+        let bytes = withUnsafeBytes(of: value) { unsafeBytes in
+            Data(unsafeBytes)
+        }
+        
+        self.encoded = bytes
     }
     
     func encode(_ value: Int64) throws {
-        fatalError("not implemented")
+        let bytes = withUnsafeBytes(of: value) { unsafeBytes in
+            Data(unsafeBytes)
+        }
+        
+        self.encoded = bytes
     }
     
     func encode(_ value: UInt) throws {
