@@ -99,5 +99,6 @@ public class FBTransaction: FirebirdTransaction {
             isc_rollback_retaining(&status, &self.handle)
         }
     }
+    
 }
 

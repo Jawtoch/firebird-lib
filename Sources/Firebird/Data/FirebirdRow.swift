@@ -1,5 +1,5 @@
 public struct FirebirdRow {
-	
+    
     public enum Error: FirebirdError {
         case invalidColumn(column: String)
         case missingData(column: String)
@@ -7,7 +7,7 @@ public struct FirebirdRow {
     
     public let decoder: FirebirdDecoder
     
-	public let index: Int
+    public let index: Int
     
     public var columns: [String] {
         self.datas.map { $0.name }

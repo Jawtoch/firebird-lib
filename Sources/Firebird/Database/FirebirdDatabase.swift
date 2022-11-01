@@ -2,15 +2,15 @@ import CFirebird
 import Logging
 
 public protocol FirebirdDatabase {
-	
-	var logger: Logger { get }
+    
+    var logger: Logger { get }
     
     var inTransaction: Bool { get }
-	
-	func drop() throws
-	
+    
+    func drop() throws
+    
     @discardableResult
-	func withTransaction<T>(_ closure: (FirebirdTransaction) throws -> T) throws -> T
+    func withTransaction<T>(_ closure: (FirebirdTransaction) throws -> T) throws -> T
     
     func query(_ string: String, _ binds: [Encodable], onRow: (FirebirdRow) throws -> Void) throws
     
