@@ -15,11 +15,16 @@ public struct FirebirdRow {
     
     public let datas: [FirebirdData]
     
+    private func prefix(_ value: String) -> String {
+        String(value.prefix(31))
+    }
+    
     public func contains(column: String) -> Bool {
-        self.columns.contains(column)
+        self.columns.contains(self.prefix(column))
     }
     
     public func column(_ columnName: String) throws -> FirebirdData {
+        let columnName = self.prefix(columnName)
         guard self.contains(column: columnName) else {
             throw Error.invalidColumn(column: columnName)
         }
