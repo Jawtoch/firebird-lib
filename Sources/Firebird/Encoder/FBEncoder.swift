@@ -12,6 +12,8 @@ public class FBEncoder: FirebirdEncoder {
             name: data.name,
             type: data.type,
             subType: data.subType,
+            length: data.length,
+            scale: data.length,
             value: encoder.encoded)
     }
     
