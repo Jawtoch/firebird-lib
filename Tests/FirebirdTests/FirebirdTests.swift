@@ -9,7 +9,7 @@ class FirebirdTests: XCTestCase {
         let decoder = FBDecoder()
         
         let value = "hello world"
-        let data = FirebirdData(name: "dummy", type: .text, subType: .null, value: nil)
+        let data = FirebirdData(name: "dummy", type: .text, subType: .null, length: 0, scale: 0, value: nil)
         
         let encoded = try encoder.encode(value, into: data)
         let decoded = try decoder.decode(String.self, from: encoded)
