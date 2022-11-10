@@ -95,7 +95,15 @@ internal class FBEncoderSingleValueEncodingContainer: SingleValueEncodingContain
     }
     
     func encode(_ value: Double) throws {
-        fatalError("not implemented")
+        let scale = fabs(Double(self.data.scale))
+        let multiplier = pow(10.0, scale)
+        let scaledValue = value * multiplier
+        
+        let intValue = Int32(scaledValue)
+        
+        let bytes = withUnsafeBytes(of: intValue) { Data($0) }
+        
+        self.encoded = bytes
     }
     
     func encode(_ value: Float) throws {
