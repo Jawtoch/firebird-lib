@@ -10,13 +10,13 @@ public struct FirebirdRow {
     public let index: Int
     
     public var columns: [String] {
-        self.datas.map { $0.name }
+        self.datas.map { self.prefix($0.name) }
     }
     
     public let datas: [FirebirdData]
     
     private func prefix(_ value: String) -> String {
-        String(value.prefix(31))
+        String(value.prefix(31)).uppercased()
     }
     
     public func contains(column: String) -> Bool {
