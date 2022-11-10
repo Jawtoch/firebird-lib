@@ -52,19 +52,27 @@ public class FirebirdXSQLVariable {
     }
     
     public var name: String {
-        String(cString: &self.handle.pointee.sqlname.0)
+        let count = Int(self.handle.pointee.sqlname_length)
+        let data = Data(bytes: &self.handle.pointee.sqlname.0, count: count)
+        return String(data: data, encoding: .utf8)!
     }
     
     public var aliasName: String {
-        String(cString: &self.handle.pointee.aliasname.0)
+        let count = Int(self.handle.pointee.aliasname_length)
+        let data = Data(bytes: &self.handle.pointee.aliasname.0, count: count)
+        return String(data: data, encoding: .utf8)!
     }
     
     public var tableName: String {
-        String(cString: &self.handle.pointee.relname.0)
+        let count = Int(self.handle.pointee.relname_length)
+        let data = Data(bytes: &self.handle.pointee.relname.0, count: count)
+        return String(data: data, encoding: .utf8)!
     }
     
     public var tableOwnerName: String {
-        String(cString: &self.handle.pointee.ownname.0)
+        let count = Int(self.handle.pointee.ownname_length)
+        let data = Data(bytes: &self.handle.pointee.ownname.0, count: count)
+        return String(data: data, encoding: .utf8)!
     }
     
     public var dataPointer: UnsafeMutablePointer<ISC_SCHAR>? {
