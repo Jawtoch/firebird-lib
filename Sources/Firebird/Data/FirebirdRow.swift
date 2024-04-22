@@ -29,7 +29,7 @@ public struct FirebirdRow {
             throw Error.invalidColumn(column: columnName)
         }
         
-        guard let data = self.datas.first(where: { $0.name == columnName }) else {
+        guard let data = self.datas.first(where: { self.prefix($0.name) == columnName }) else {
             throw Error.missingData(column: columnName)
         }
         

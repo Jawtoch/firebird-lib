@@ -1,3 +1,4 @@
+import CFirebird
 import Foundation
 
 public class FBEncoder: FirebirdEncoder {
@@ -99,7 +100,7 @@ internal class FBEncoderSingleValueEncodingContainer: SingleValueEncodingContain
         let multiplier = pow(10.0, scale)
         let scaledValue = value * multiplier
         
-        let intValue = Int32(scaledValue)
+        let intValue = Int32(scaledValue.rounded())
         
         let bytes = withUnsafeBytes(of: intValue) { Data($0) }
         
@@ -159,6 +160,20 @@ internal class FBEncoderSingleValueEncodingContainer: SingleValueEncodingContain
     func encode(_ value: Int64) throws {
         let bytes = withUnsafeBytes(of: value) { unsafeBytes in
             Data(unsafeBytes)
+        }
+        
+        self.encoded = bytes
+    }
+    
+    func encode(_ value: Date) throws {
+        let timeInterval = value.timeIntervalSince1970.rounded()
+        var rawTime: time_t = time_t(timeInterval)
+        var timeInfo = gmtime(&rawTime)
+        var timestamp: ISC_TIMESTAMP!
+        isc_encode_timestamp(&timeInfo, &timestamp)
+        
+        let bytes = withUnsafeBytes(of: &timestamp) {
+            Data($0)
         }
         
         self.encoded = bytes

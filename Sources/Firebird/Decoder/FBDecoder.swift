@@ -1,3 +1,4 @@
+import CFirebird
 import Foundation
 
 public class FBDecoder: FirebirdDecoder {
@@ -35,7 +36,7 @@ class FBDecoderImpl: Decoder {
     }
     
     func singleValueContainer() throws -> SingleValueDecodingContainer {
-        FBDecoderSingleValueDecodingContainer(data: self.data, codingPath: self.codingPath)
+        FBDecoderSingleValueDecodingContainer(data: self.data, codingPath: self.codingPath, superDecoder: self)
     }
     
 }
@@ -46,9 +47,12 @@ internal class FBDecoderSingleValueDecodingContainer: SingleValueDecodingContain
     
     let data: FirebirdData
     
-    init(data: FirebirdData, codingPath: [CodingKey]) {
+    let superDecoder: Decoder
+    
+    init(data: FirebirdData, codingPath: [CodingKey], superDecoder: Decoder) {
         self.data = data
         self.codingPath = codingPath
+        self.superDecoder = superDecoder
     }
     
     func decodeNil() -> Bool {
@@ -71,41 +75,20 @@ internal class FBDecoderSingleValueDecodingContainer: SingleValueDecodingContain
     }
     
     func decode(_ type: Double.Type) throws -> Double {
-        guard let bytes = self.data.value else {
+        switch self.data.type {
+        case .dateOnly, .timeOnly, .timestamp:
+            return try _decodeAnyDateAsDouble(data: self.data)
+        case .long:
+            return try _decodeLongAsDouble(data: self.data)
+        case .int64:
+            return try SQLInt64(from: self.data).doubleValue()
+        default:
             fatalError("not implemented")
         }
-        
-        let intValue = Double(bytes.withUnsafeBytes { unsafeBytes in
-            unsafeBytes.load(as: Int32.self)
-        })
-        
-        
-        
-        let scale = fabs(Double(self.data.scale))
-        let multiplier = pow(10.0, scale)
-        
-        let value = intValue / multiplier
-        
-        return value
     }
     
     func decode(_ type: Float.Type) throws -> Float {
-        guard let bytes = self.data.value else {
-            fatalError("not implemented")
-        }
-        
-        let intValue = Float(bytes.withUnsafeBytes { unsafeBytes in
-            unsafeBytes.load(as: Int32.self)
-        })
-        
-        
-        
-        let scale = fabsf(Float(self.data.scale))
-        let multiplier = pow(10.0, scale)
-        
-        let value = intValue / multiplier
-        
-        return value
+        fatalError("not implemented")
     }
     
     func decode(_ type: Int.Type) throws -> Int {
@@ -195,25 +178,26 @@ internal class FBDecoderSingleValueDecodingContainer: SingleValueDecodingContain
     }
     
     func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
-        if let type = type as? Int.Type {
-            return try self.decode(type) as! T
-        }
-        
-        if let type = type as? String.Type {
-            return try self.decode(type) as! T
-        }
-        
-        if let type = type as? Float.Type {
-            return try self.decode(type) as! T
-        }
-        
-        if let type = type as? Double.Type {
-            return try self.decode(type) as! T
-        }
-        
+        return try type.init(from: self.superDecoder)
+    }
+    
+}
+
+fileprivate func _decodeLongAsDouble(data: FirebirdData) throws -> Double {
+    guard let bytes = data.value else {
         fatalError("not implemented")
     }
     
+    let intValue = Double(bytes.withUnsafeBytes { unsafeBytes in
+        unsafeBytes.load(as: Int32.self)
+    })
+    
+    let scale = fabs(Double(data.scale))
+    let multiplier = pow(10.0, scale)
+    
+    let value = intValue / multiplier
+    
+    return value
 }
 
 fileprivate func _decodeTextAsString(data: FirebirdData) throws -> String {
@@ -227,7 +211,6 @@ fileprivate func _decodeTextAsString(data: FirebirdData) throws -> String {
     
     return value
 }
-
 
 fileprivate func _decodeVaryingAsString(data: FirebirdData) throws -> String {
     guard let data = data.value else {
@@ -252,3 +235,91 @@ fileprivate func _decodeVaryingAsString(data: FirebirdData) throws -> String {
     return value
 }
 
+fileprivate func _decodeAnyDateAsDouble(data: FirebirdData) throws -> Double {
+    guard let bytes = data.value else {
+        fatalError("not implemented")
+    }
+    
+    var timeInfo: tm
+    switch data.type {
+    case .dateOnly:
+        timeInfo = _decodeSQLDateAsTm(bytes: bytes)
+    case .timeOnly:
+        timeInfo = _decodeSQLTimeAsTm(bytes: bytes)
+    case .timestamp:
+        timeInfo = _decodeTimestampAsTm(bytes: bytes)
+    default:
+        fatalError("not implemented")
+    }
+    
+    let rawTime = timegm(&timeInfo)
+    let timeInterval = TimeInterval(rawTime)
+    let offset = Date.timeIntervalBetween1970AndReferenceDate
+    
+    return timeInterval - offset
+}
+
+fileprivate func _decodeTimestampAsTm(bytes: Data) -> tm {
+    var timestamp = bytes.withUnsafeBytes {
+        $0.load(as: ISC_TIMESTAMP.self)
+    }
+    
+    var timeInfo: tm = tm()
+    isc_decode_timestamp(&timestamp, &timeInfo)
+    
+    return timeInfo
+}
+
+fileprivate func _decodeSQLDateAsTm(bytes: Data) -> tm {
+    var sqlDate = bytes.withUnsafeBytes {
+        $0.load(as: ISC_DATE.self)
+    }
+    
+    var timeInfo: tm = tm()
+    isc_decode_sql_date(&sqlDate, &timeInfo)
+    
+    return timeInfo
+}
+
+fileprivate func _decodeSQLTimeAsTm(bytes: Data) -> tm {
+    var sqlTime = bytes.withUnsafeBytes {
+        $0.load(as: ISC_TIME.self)
+    }
+    
+    var timeInfo: tm = tm()
+    isc_decode_sql_time(&sqlTime, &timeInfo)
+    
+    return timeInfo
+}
+
+protocol SQLDataType {
+    
+    init(from data: FirebirdData) throws
+    
+    func doubleValue() throws -> Double
+    
+}
+
+struct SQLInt64: SQLDataType {
+    
+    let data: FirebirdData
+    
+    let value: Int64
+    
+    init(from data: FirebirdData) throws {
+        self.data = data
+        
+        guard let bytes = self.data.value else {
+            fatalError("not implemented")
+        }
+        
+        self.value = bytes.withUnsafeBytes { $0.load(as: Int64.self) }
+    }
+    
+    func doubleValue() throws -> Double {
+        let scale = fabs(Double(self.data.scale))
+        let multiplier = pow(10.0, scale)
+        return Double(self.value) / multiplier
+    }
+    
+}

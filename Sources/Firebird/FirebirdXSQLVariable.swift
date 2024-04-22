@@ -52,25 +52,25 @@ public class FirebirdXSQLVariable {
     }
     
     public var name: String {
-        let count = Int(self.handle.pointee.sqlname_length)
+        let count = min(Int(self.handle.pointee.sqlname_length), 31)
         let data = Data(bytes: &self.handle.pointee.sqlname.0, count: count)
         return String(data: data, encoding: .utf8)!
     }
     
     public var aliasName: String {
-        let count = Int(self.handle.pointee.aliasname_length)
+        let count = min(Int(self.handle.pointee.aliasname_length), 31)
         let data = Data(bytes: &self.handle.pointee.aliasname.0, count: count)
         return String(data: data, encoding: .utf8)!
     }
     
     public var tableName: String {
-        let count = Int(self.handle.pointee.relname_length)
+        let count = min(Int(self.handle.pointee.relname_length), 31)
         let data = Data(bytes: &self.handle.pointee.relname.0, count: count)
         return String(data: data, encoding: .utf8)!
     }
     
     public var tableOwnerName: String {
-        let count = Int(self.handle.pointee.ownname_length)
+        let count = min(Int(self.handle.pointee.ownname_length), 31)
         let data = Data(bytes: &self.handle.pointee.ownname.0, count: count)
         return String(data: data, encoding: .utf8)!
     }
